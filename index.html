@@ -238,7 +238,7 @@ nav.scrolled {
 .turbine-1 .blades { animation-duration: 3s; }
 .turbine-2 .blades { animation-duration: 5s; }
 .turbine-3 .blades { animation-duration: 4s; }
-.turbine-line { fill: none; stroke: #1c4475; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+.turbine-line { fill: none; stroke: #1c4475; stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; }
 
 /* Ship — gentle bob */
 @keyframes shipBob {
@@ -479,19 +479,18 @@ footer p { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-muted);
                 fill="none" stroke="#1c4475" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
         </g>
       </g>
-      <!-- Cloud 2 (medium, centre) -->
       <g class="sky-cloud-2">
         <g transform="translate(600, 110)">
-          <path d="M-25,10 
-                   C-35,10 -40,-10 -20,-15 
-                   C-20,-30 5,-35 15,-20 
-                   C25,-30 50,-20 45,0 
-                   C55,15 35,30 15,25 
-                   L-15,25 
-                   C-30,25 -35,15 -25,10 Z"
+          <path d="M-12,5 
+                   C-17,5 -20,-5 -10,-7.5 
+                   C-10,-15 2.5,-17.5 7.5,-10 
+                   C12.5,-15 25,-10 22.5,0 
+                   C27.5,7.5 17.5,15 7.5,12.5 
+                   L-7.5,12.5 
+                   C-15,12.5 -17,7.5 -12,5 Z"
                 fill="none" 
                 stroke="#1c4475" 
-                stroke-width="1.5" 
+                stroke-width="1" 
                 stroke-linecap="round" 
                 stroke-linejoin="round"/>
         </g>
@@ -514,34 +513,57 @@ footer p { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-muted);
         </g>
       </g>
 
-      <path d="M0 320 Q400 270 800 320" class="turbine-line"/>
+      <path d="M0 300 Q400 270 800 300" class="turbine-line"/>
 
       <g transform="translate(400, 295)">
-        <line x1="0" y1="0" x2="0" y2="-20" stroke="#4a2f00" stroke-width="2"/> 
+        <line x1="0" y1="-10" x2="0" y2="-20" stroke="#4a2f00" stroke-width="2"/> 
         <circle cx="0" cy="-38" r="18" fill="none" stroke="#2d5a27" stroke-width="1.5"/>
       </g>
       <g transform="translate(440, 295)">
-        <line x1="0" y1="0" x2="0" y2="-10" stroke="#4a2f00" stroke-width="2"/>
-        <circle cx="0" cy="-20" r="10" fill="none" stroke="#2d5a27" stroke-width="1.5"/>
+        <line x1="0" y1="-10" x2="0" y2="-20" stroke="#4a2f00" stroke-width="2"/>
+        <circle cx="0" cy="-30" r="10" fill="none" stroke="#2d5a27" stroke-width="1.5"/>
+      </g>
+
+      <!-- BESS Multi-cell Container -->
+      <g transform="translate(420, 320) scale(0.6)">
+        <rect x="1" y="1" width="83" height="53" rx="4" stroke="#2D5016" stroke-width="2" fill="none"/>
+        <!-- Cell 1 -->
+        <rect x="8" y="10" width="16" height="35" rx="2" stroke="#2D5016" stroke-width="2" fill="none"/>
+        <!-- Cell 2 -->
+        <rect x="28" y="10" width="16" height="35" rx="2" stroke="#2D5016" stroke-width="2" fill="none"/>
+        <!-- Cell 3 -->
+        <rect x="48" y="10" width="16" height="35" rx="2" stroke="#2D5016" stroke-width="2" fill="none"/>
+        <!-- Cell 4 -->
+        <rect x="68" y="10" width="10" height="35" rx="2" stroke="#2D5016" stroke-width="1.5" fill="none"/>
+        <!-- Terminal caps -->
+        <line x1="12" y1="10" x2="20" y2="10" stroke="#2D5016" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="32" y1="10" x2="40" y2="10" stroke="#2D5016" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="52" y1="10" x2="60" y2="10" stroke="#2D5016" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="70" y1="10" x2="76" y2="10" stroke="#2D5016" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- + symbols -->
+        <text x="16" y="38" font-family="sans-serif" font-size="9" fill="#2D5016" text-anchor="middle">+</text>
+        <text x="36" y="38" font-family="sans-serif" font-size="9" fill="#2D5016" text-anchor="middle">+</text>
+        <text x="56" y="38" font-family="sans-serif" font-size="9" fill="#2D5016" text-anchor="middle">+</text>
+        <text x="73" y="38" font-family="sans-serif" font-size="9" fill="#2D5016" text-anchor="middle">+</text>
       </g>
 
       <g class="turbine-1" transform="translate(500, 103)">
-        <line x1="48.5" y1="195" x2="50" y2="126" class="turbine-line"/>
-        <line x1="56.5" y1="195" x2="55" y2="126" class="turbine-line"/>
+        <line x1="39" y1="183" x2="39.75" y2="115" class="turbine-line"/>
+        <line x1="45" y1="183" x2="44.25" y2="115" class="turbine-line"/>
         <g class="blades">
-          <image href="assets/blade_wind.png" x="-13" y="54" width="130" height="130"/>
+          <image href="assets/blade_wind.png" x="-13" y="54" width="110" height="110"/>
         </g>
       </g>
       <g class="turbine-2" transform="translate(600, 49)">
-        <line x1="48" y1="255" x2="50" y2="148" class="turbine-line"/>
-        <line x1="57" y1="255" x2="55" y2="148" class="turbine-line"/>
+        <line x1="33" y1="240" x2="34.5" y2="132" class="turbine-line"/>
+        <line x1="40" y1="240" x2="38.5" y2="132" class="turbine-line"/>
         <g class="blades">
-          <image href="assets/blade_wind.png" x="-37" y="48" width="180" height="180"/>
+          <image href="assets/blade_wind.png" x="-37" y="48" width="150" height="150"/>
         </g>
       </g>
       <g class="turbine-3" transform="translate(700, 150)">
-        <line x1="49" y1="164" x2="50" y2="104" class="turbine-line"/>
-        <line x1="54" y1="164" x2="53" y2="104" class="turbine-line"/>
+        <line x1="49" y1="146" x2="50" y2="104" class="turbine-line"/>
+        <line x1="54" y1="146" x2="53" y2="104" class="turbine-line"/>
         <g class="blades">
           <image href="assets/blade_wind.png" x="1" y="48" width="100" height="100"/>
         </g>
@@ -563,14 +585,41 @@ footer p { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-muted);
         <animateTransform attributeName="transform" type="translate" from="0,0" to="-80,0" dur="9s" repeatCount="indefinite"/>
       </g>
       <g style="mix-blend-mode:multiply"><image href="assets/building.png" x="270" y="70" width="320" height="180"/></g>
-      <g style="mix-blend-mode:multiply"><image href="assets/ferry.png" x="260" y="230" width="480" height="320"/></g>
-      
-      <g class="ops-wrapper" transform="translate(400, 350)">
+      <g style="mix-blend-mode:multiply"><image href="assets/ferry.png" x="330" y="230" width="480" height="320"/></g>
+      <g style="mix-blend-mode:multiply"><image href="assets/pv.png" x="680" y="285" width="80" height="80"/></g>
+      <g style="mix-blend-mode:multiply"><image href="assets/pv.png" x="730" y="300" width="60" height="60"/></g>      
+      <g style="mix-blend-mode:multiply"><image href="assets/pv.png" x="770" y="315" width="40" height="40"/></g>      
+      <g class="ops-wrapper" transform="translate(400, 340)">
         <rect rx="5" ry="5" x="-18" y="-19" width="36" height="36" fill="none" stroke="#2d5a27" stroke-width="1.5"/>
         <g class="ops-bolt">
           <path d="M3,-12 L-5,3 L0,3 L-3,13 L5,-3 L0,-3 Z" fill="#d4a843" stroke="#c8a04a" stroke-width="0.5"/>
         </g>
       </g>
+
+      <g>
+        <line x1="430" y1="320" x2="450" y2="300" 
+              stroke="#ed9e00" 
+              stroke-width="0.5" 
+              stroke-dasharray="1,1" />           
+        <circle cx="450" cy="300" r="1.2" fill="#ed9e00" />
+        <text x="465" y="300"
+              font-family="Arial" 
+              font-size="9" 
+              fill="#ed9e00" 
+              text-anchor="middle">BESS</text>
+      </g>
+      <g>
+        <line x1="400" y1="320" x2="410" y2="300" 
+              stroke="#ed9e00" 
+              stroke-width="0.5" 
+              stroke-dasharray="1,1" />           
+        <circle cx="410" cy="300" r="1.2" fill="#ed9e00" />
+        <text x="425" y="300"
+              font-family="Arial" 
+              font-size="9" 
+              fill="#ed9e00" 
+              text-anchor="middle">OPS</text>
+      </g>      
     </svg>
     
 
