@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { background-color: #fcfaf7; display: flex; justify-content: center; align-items: center; height: 100vh; }
+
+  /* Animasi Rotasi */
+  @keyframes rotate-blade {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .blades {
+    animation: rotate-blade 4s linear infinite;
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  /* Variasi kecepatan supaya natural */
+  .turbine-1 .blades { animation-duration: 3s; }
+  .turbine-2 .blades { animation-duration: 5s; }
+  .turbine-3 .blades { animation-duration: 4s; }
+
+  .st0 { fill: none; stroke: #1c4475; stroke-width: 1; stroke-linecap: round; stroke-linejoin: round; }
+</style>
+</head>
+<body>
+
+<svg viewBox="0 0 800 400" width="1000" height="800" xmlns="http://www.w3.org/2000/svg">
+  <path d="M0 320 Q400 270 800 320" class="st0" />
+
+  <g class="turbine-1" transform="translate(400, 100)">
+    <line x1="48" y1="195" x2="50" y2="126" class="st0" />
+    <line x1="57" y1="195" x2="55" y2="126" class="st0" />
+    <g class="blades">
+      <image href="assets/blade_wind.png" x="-13" y="54" width="130" height="130" />
+    </g>
+  </g>
+
+  <g class="turbine-2" transform="translate(600, 50)">
+    <line x1="48" y1="255" x2="50" y2="148" class="st0" />
+    <line x1="57" y1="255" x2="55" y2="148" class="st0" />
+    <g class="blades">
+      <image href="assets/blade_wind.png" x="-37" y="48" width="180" height="180" />
+    </g>
+  </g>
+
+  <g class="turbine-3" transform="translate(700, 150)">
+    <line x1="49" y1="164" x2="50" y2="104" class="st0" />
+    <line x1="54" y1="164" x2="53" y2="104" class="st0" />
+    <g class="blades">
+      <image href="assets/blade_wind.png" x="1" y="49" width="100" height="100" />
+    </g>
+  </g>
+</svg>
+
+</body>
+</html>
