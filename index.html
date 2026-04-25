@@ -583,18 +583,16 @@ footer p { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-muted);
 
       <path d="M0 500 Q400 320 800 350" class="turbine-line" fill="none" stroke="#1c4475" stroke-width="2"/>
 
-      <!-- Wave 1 — main, faster -->
-      <g opacity="0.7">
-        <path d="M300,424 Q320,414 340,424 Q360,434 380,424 Q400,414 420,424 Q440,434 460,424 Q480,414 500,424 Q520,434 540,424 Q560,414 580,424 Q600,434 620,424 Q640,414 660,424 Q680,434 700,424 Q720,414 740,424 Q760,434 780,424 Q800,414 820,424 Q840,434 860,424 Q880,414 900,424"
+<g opacity="0.7">
+        <path d="M380,424 Q400,414 420,424 Q440,434 460,424 Q480,414 500,424 Q520,434 540,424 Q560,414 580,424 Q600,434 620,424 Q640,414 660,424 Q680,434 700,424 Q720,414 740,424 Q760,434 780,424 Q800,414 820,424"
               fill="none" stroke="#1c4475" stroke-width="1" stroke-linecap="round"/>
-        <animateTransform attributeName="transform" type="translate" from="0,0" to="-80,0" dur="5s" repeatCount="indefinite"/>
+        <animateTransform attributeName="transform" type="translate" from="0,0" to="-40,0" dur="5s" repeatCount="indefinite"/>
       </g>
 
-      <!-- Wave 2 — secondary, slower, phase-shifted -->
       <g opacity="1">
-        <path d="M300,445 Q320,451 340,445 Q360,439 380,445 Q400,451 420,445 Q440,439 460,445 Q480,451 500,445 Q520,439 540,445 Q560,451 580,445 Q600,439 620,445 Q640,451 660,445 Q680,439 700,445 Q720,451 740,445 Q760,439 780,445 Q800,451 820,445 Q840,439 860,445 Q880,451 900,445"
+        <path d="M380,445 Q400,451 420,445 Q440,439 460,445 Q480,451 500,445 Q520,439 540,445 Q560,451 580,445 Q600,439 620,445 Q640,451 660,445 Q680,439 700,445 Q720,451 740,445 Q760,439 780,445 Q800,451 820,445"
               fill="none" stroke="#1c4475" stroke-width="0.7" stroke-linecap="round"/>
-        <animateTransform attributeName="transform" type="translate" from="0,0" to="-80,0" dur="9s" repeatCount="indefinite"/>
+        <animateTransform attributeName="transform" type="translate" from="0,0" to="-40,0" dur="9s" repeatCount="indefinite"/>
       </g>
       <g style="mix-blend-mode:multiply"><image href="assets/building.png" x="270" y="70" width="320" height="180"/></g>
       <g style="mix-blend-mode:multiply"><image href="assets/ferry.png" x="330" y="230" width="480" height="320"/></g>
