@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ardian Candra — Electrical &amp; Sustainable Energy Engineer</title>
+<meta name="description" content="Ardian Candra — 10+ years powering Indonesia's islands. MSc at KTH Stockholm."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Newsreader:ital,wght@0,400;0,600;1,400;1,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/*
+  ╔══════════════════════════════════════════════════════════╗
+  ║  CROPPING GUIDE — Cut these from the sketch PNG         ║
+  ║  Save each with TRANSPARENT background as PNG           ║
+  ║  Put them in: assets/ folder                            ║
+  ║                                                         ║
+  ║  1. assets/sun.png        — sun + rays                  ║
+  ║  2. assets/cloud-1.png    — large cloud (center-left)   ║
+  ║  3. assets/cloud-2.png    — small cloud (far right)     ║
+  ║  4. assets/buildings.png  — two buildings + trees        ║
+  ║  5. assets/bess.png       — BESS container + bolt       ║
+  ║  6. assets/solar-pv.png   — solar panel array           ║
+  ║  7. assets/wind-turbines.png — three turbines + hill    ║
+  ║  8. assets/ship.png       — ferry + OPS plug            ║
+  ║  9. assets/ev-bus.png     — electric bus + charger       ║
+  ║  10. assets/waves.png     — wave pattern (wide strip)   ║
+  ║  11. assets/ground.png    — ground/horizon line          ║
+  ║  12. assets/submarine-plug.png — underwater plug         ║
+  ║                                                         ║
+  ║  TIP: Use remove.bg or Photoshop "Magic Wand"          ║
+  ║  to remove white background → transparent PNG           ║
+  ╚══════════════════════════════════════════════════════════╝
+*/
+
+:root {
+  --cream: #faf8f4;
+  --warm-white: #f5f0e8;
+  --ink: #1a1a1a;
+  --ink-soft: #4a4a4a;
+  --ink-muted: #8a8a8a;
+  --accent: #c8a04a;
+  --green: #2d6a4f;
+  --blue: #1d3557;
+  --gold: #d4a843;
+  --blob-1: #e8ddc8;
+  --blob-2: #d8e8d4;
+  --blob-3: #d4dce8;
+  --sans: 'Instrument Sans', sans-serif;
+  --serif: 'Newsreader', Georgia, serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--sans); background: var(--cream); color: var(--ink);
+  line-height: 1.7; overflow-x: hidden; -webkit-font-smoothing: antialiased;
+}
+a { color: var(--green); text-decoration: none; }
+a:hover { text-decoration: underline; }
+::selection { background: var(--accent); color: white; }
+
+/* ═══════════════════════════════════
+   NAV
+   ═══════════════════════════════════ */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 1.25rem 3rem;
+  display: flex; justify-content: space-between; align-items: center;
+  transition: all 0.4s ease;
+}
+nav.scrolled {
+  background: rgba(250,248,244,0.92);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.05);
+}
+.nav-name { font-family: var(--serif); font-weight: 600; font-size: 1.1rem; }
+.nav-links { display: flex; gap: 2rem; list-style: none; }
+.nav-links a { color: var(--ink-muted); font-size: 0.85rem; font-weight: 500; transition: color 0.3s; }
+.nav-links a:hover { color: var(--ink); text-decoration: none; }
+
+/* ═══════════════════════════════════
+   REVEAL
+   ═══════════════════════════════════ */
+.reveal {
+  opacity: 0; transform: translateY(32px);
+  transition: opacity 0.9s cubic-bezier(0.22,1,0.36,1), transform 0.9s cubic-bezier(0.22,1,0.36,1);
+}
+.reveal.in { opacity: 1; transform: translateY(0); }
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+
+/* ═══════════════════════════════════
+   HERO — ANIMATED SKETCH SCENE
+   ═══════════════════════════════════ */
+#hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Hero text overlay */
+.hero-text {
+  position: relative;
+  z-index: 10;
+  padding: 7rem 5rem 2rem;
+  max-width: 600px;
+}
+.hero-dots { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+.hero-dots span { width: 8px; height: 8px; border-radius: 50%; }
+.hero-meta {
+  font-family: var(--mono); font-size: 0.72rem;
+  text-transform: uppercase; letter-spacing: 0.15em;
+  color: var(--ink-muted);
+  display: flex; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;
+}
+.hero-meta span::before { content: "◦ "; color: var(--accent); }
+#hero h1 {
+  font-family: var(--sans); font-size: clamp(2.4rem,5vw,4.5rem);
+  font-weight: 800; line-height: 0.95; letter-spacing: -0.04em;
+  margin-bottom: 1.2rem;
+}
+#hero h1 em { font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--green); }
+.hero-tagline {
+  font-size: 1.05rem; max-width: 480px;
+  color: var(--ink-soft); line-height: 1.7; margin-bottom: 2rem;
+}
+.hero-tagline strong { color: var(--ink); font-weight: 600; }
+.hero-cta { display: flex; gap: 1rem; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.85rem 1.75rem; font-family: var(--sans); font-size: 0.88rem;
+  font-weight: 600; border-radius: 100px; border: 1.5px solid transparent;
+  cursor: pointer; transition: all 0.3s; text-decoration: none;
+}
+.btn-dark { background: var(--ink); color: var(--cream); }
+.btn-dark:hover { background: var(--green); text-decoration: none; }
+.btn-outline { border-color: rgba(0,0,0,0.15); color: var(--ink); background: transparent; }
+.btn-outline:hover { border-color: var(--ink); text-decoration: none; }
+
+/* ═══════════════════════════════════
+   SKETCH SCENE CONTAINER
+   The scene uses position:relative with
+   aspect ratio matching the sketch (1394:768 ≈ 1.815:1).
+   Each layer is position:absolute inside.
+   ═══════════════════════════════════ */
+.scene {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1394 / 768;
+  max-height: 65vh;
+  margin-top: auto;
+  overflow: hidden;
+}
+
+/* Individual layer — positioned absolutely */
+.scene-layer {
+  position: absolute;
+  /* Each layer will use top/left/width in % to match original sketch positions */
+}
+.scene-layer img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+}
+
+/*
+  LAYER POSITIONS (% based on 1394×768 canvas)
+  Adjust these if your crops are slightly different.
+*/
+
+/* Sky elements */
+.layer-sun        { top: 2%;  left: 30%;  width: 10%; }
+.layer-cloud-1    { top: 5%;  left: 38%;  width: 14%; }
+.layer-cloud-2    { top: 8%;  left: 82%;  width: 12%; }
+
+/* Ground / horizon (full width strip) */
+.layer-ground     { top: 54%; left: 0;    width: 100%; }
+
+/* Upper scene: buildings, BESS, solar, turbines */
+.layer-buildings  { top: 6%;  left: 0%;   width: 28%; }
+.layer-bess       { top: 30%; left: 28%;  width: 14%; }
+.layer-solar      { top: 26%; left: 56%;  width: 20%; }
+.layer-turbines   { top: 4%;  left: 58%;  width: 25%; }
+
+/* Lower scene: ship, bus, waves */
+.layer-ship       { top: 44%; left: 0%;   width: 32%; }
+.layer-ops-plug   { top: 42%; left: 28%;  width: 8%;  }
+.layer-ev-bus     { top: 42%; left: 52%;  width: 26%; }
+.layer-sub-plug   { top: 58%; left: 44%;  width: 6%;  }
+
+/* Waves: full width, tiled horizontally for scrolling effect */
+.layer-waves      { top: 68%; left: 0;    width: 100%; height: 32%; overflow: hidden; }
+.layer-waves img  { width: 200%; height: 100%; object-fit: cover; }
+
+/* ═══════════════════════════════════
+   LAYER ANIMATIONS
+   ═══════════════════════════════════ */
+
+/* Sun — gentle pulse */
+@keyframes sunPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.06); opacity: 0.9; }
+}
+.layer-sun { animation: sunPulse 4s ease-in-out infinite; }
+
+/* Clouds — slow drift right */
+@keyframes driftRight {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(30px); }
+}
+@keyframes driftRightSlow {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(20px); }
+}
+.layer-cloud-1 { animation: driftRight 12s ease-in-out infinite alternate; }
+.layer-cloud-2 { animation: driftRightSlow 16s ease-in-out infinite alternate; }
+
+/* Wind turbines — we can't spin individual blades with a PNG,
+   but a subtle sway gives life */
+@keyframes turbiSway {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(0.8deg); }
+}
+.layer-turbines { animation: turbiSway 6s ease-in-out infinite; transform-origin: bottom center; }
+
+/* Ship — gentle bob */
+@keyframes shipBob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25%      { transform: translateY(-4px) rotate(-0.5deg); }
+  75%      { transform: translateY(3px) rotate(0.3deg); }
+}
+.layer-ship { animation: shipBob 5s ease-in-out infinite; }
+
+/* EV Bus — slow drive-in from right (plays once on load) */
+@keyframes driveIn {
+  0%   { transform: translateX(60px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+.layer-ev-bus { animation: driveIn 2s ease-out 1s both; }
+
+/* Waves — continuous horizontal scroll */
+@keyframes waveScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.layer-waves img { animation: waveScroll 8s linear infinite; }
+
+/* Solar panel — subtle shimmer */
+@keyframes shimmer {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.08); }
+}
+.layer-solar { animation: shimmer 3s ease-in-out infinite; }
+
+/* Buildings — fade in on load */
+@keyframes fadeUp {
+  0%   { transform: translateY(20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.layer-buildings { animation: fadeUp 1.2s ease-out 0.3s both; }
+.layer-bess      { animation: fadeUp 1.2s ease-out 0.6s both; }
+.layer-solar     { animation: shimmer 3s ease-in-out infinite, fadeUp 1.2s ease-out 0.5s both; }
+.layer-turbines  { animation: turbiSway 6s ease-in-out infinite, fadeUp 1.2s ease-out 0.4s both; }
+
+/* ═══════════════════════════════════
+   PLACEHOLDER BOXES (remove when you add real images)
+   These show where each crop goes with a dashed outline
+   ═══════════════════════════════════ */
+.placeholder {
+  width: 100%; height: 100%;
+  border: 2px dashed rgba(0,0,0,0.15);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 0.6rem;
+  color: var(--ink-muted); text-align: center;
+  padding: 0.5rem;
+  background: rgba(0,0,0,0.02);
+}
+
+/* Scroll arrow */
+.scroll-arrow {
+  position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+  width: 48px; height: 48px; border-radius: 50%;
+  border: 1.5px solid rgba(0,0,0,0.12);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink-muted); cursor: pointer; transition: all 0.3s; z-index: 10;
+}
+.scroll-arrow:hover { border-color: var(--ink); color: var(--ink); }
+
+/* ═══════════════════════════════════
+   STATS
+   ═══════════════════════════════════ */
+.stats { display: grid; grid-template-columns: repeat(4,1fr); border-top: 1px solid rgba(0,0,0,0.07); border-bottom: 1px solid rgba(0,0,0,0.07); }
+.stat { padding: 2.5rem 3rem; text-align: center; border-right: 1px solid rgba(0,0,0,0.05); }
+.stat:last-child { border-right: none; }
+.stat-num { font-family: var(--sans); font-weight: 800; font-size: clamp(2rem,4vw,3rem); letter-spacing: -0.03em; line-height: 1; }
+.stat-label { font-family: var(--mono); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-muted); margin-top: 0.5rem; }
+
+/* ═══════════════════════════════════
+   PANELS (story sections)
+   ═══════════════════════════════════ */
+.panel {
+  min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr;
+  align-items: center; padding: 6rem 5rem; overflow: hidden;
+}
+.panel-text { max-width: 520px; padding-right: 2rem; }
+.panel-visual { display: flex; justify-content: center; align-items: center; position: relative; }
+.float-wrap { position: relative; width: 100%; max-width: 440px; will-change: transform; transition: transform 0.05s linear; }
+.float-wrap img { width: 100%; height: auto; position: relative; z-index: 2; }
+.blob { position: absolute; width: 110%; height: 110%; top: -5%; left: -5%; border-radius: 50% 40% 60% 30% / 50% 60% 40% 50%; z-index: 1; opacity: 0.55; animation: morphBlob 12s ease-in-out infinite alternate; }
+@keyframes morphBlob {
+  0%   { border-radius: 50% 40% 60% 30% / 50% 60% 40% 50%; transform: scale(1) rotate(0deg); }
+  33%  { border-radius: 40% 60% 30% 50% / 60% 30% 70% 40%; transform: scale(1.03) rotate(3deg); }
+  66%  { border-radius: 60% 30% 50% 40% / 40% 70% 30% 60%; transform: scale(0.97) rotate(-2deg); }
+  100% { border-radius: 30% 60% 40% 70% / 50% 40% 60% 30%; transform: scale(1.02) rotate(1deg); }
+}
+.panel.reverse .panel-text { order: 2; padding-right: 0; padding-left: 2rem; }
+.panel.reverse .panel-visual { order: 1; }
+
+/* Typography */
+.label { font-family: var(--mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.18em; color: var(--ink-muted); margin-bottom: 1rem; }
+.label .num { color: var(--accent); font-weight: 600; }
+.heading { font-family: var(--sans); font-weight: 700; font-size: clamp(2rem,3.5vw,3.2rem); line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 1.25rem; }
+.heading em { font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--green); }
+.body-text { font-size: 1.05rem; color: var(--ink-soft); line-height: 1.8; margin-bottom: 1.5rem; }
+.body-text strong { color: var(--ink); font-weight: 600; }
+.tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.tags span { font-family: var(--mono); font-size: 0.65rem; padding: 0.3rem 0.65rem; border: 1px solid rgba(0,0,0,0.1); border-radius: 100px; color: var(--ink-soft); transition: all 0.3s; }
+.tags span:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ═══════════════════════════════════
+   TIMELINE
+   ═══════════════════════════════════ */
+#timeline { padding: 6rem 5rem; background: var(--warm-white); }
+.timeline-header { text-align: center; margin-bottom: 4rem; }
+.timeline-header h2 { font-family: var(--sans); font-weight: 800; font-size: clamp(2rem,4vw,3rem); letter-spacing: -0.03em; }
+.timeline-header h2 em { font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--green); }
+.tl-track { max-width: 800px; margin: 0 auto; position: relative; padding-left: 3rem; }
+.tl-track::before { content:''; position: absolute; left: 6px; top: 0; bottom: 0; width: 1.5px; background: rgba(0,0,0,0.1); }
+.tl-item { position: relative; padding-bottom: 2.5rem; }
+.tl-item::before { content:''; position: absolute; left: -3rem; top: 0.4rem; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--accent); background: var(--warm-white); }
+.tl-item.hl::before { background: var(--accent); }
+.tl-year { font-family: var(--mono); font-size: 0.72rem; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 0.25rem; }
+.tl-title { font-weight: 700; font-size: 1.1rem; margin-bottom: 0.25rem; }
+.tl-desc { font-size: 0.9rem; color: var(--ink-soft); line-height: 1.7; }
+
+/* ═══════════════════════════════════
+   SKILLS
+   ═══════════════════════════════════ */
+#skills { padding: 6rem 5rem; }
+.skills-header { text-align: center; margin-bottom: 3.5rem; }
+.skills-header h2 { font-family: var(--sans); font-weight: 800; font-size: clamp(2rem,4vw,3rem); letter-spacing: -0.03em; }
+.skills-header h2 em { font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--green); }
+.skills-grid { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: repeat(3,1fr); gap: 2rem; }
+.skill-cat { padding: 2rem; border: 1px solid rgba(0,0,0,0.06); border-radius: 16px; background: white; }
+.skill-cat h3 { font-weight: 700; font-size: 0.95rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+.skill-cat h3 .dot { width: 8px; height: 8px; border-radius: 50%; }
+.skill-cat .tags span { background: var(--cream); border-color: transparent; }
+
+/* ═══════════════════════════════════
+   CONTACT
+   ═══════════════════════════════════ */
+#contact { padding: 6rem 5rem; background: var(--warm-white); text-align: center; }
+.contact-inner { max-width: 550px; margin: 0 auto; }
+.contact-inner h2 { font-family: var(--sans); font-weight: 800; font-size: clamp(2rem,4vw,3rem); letter-spacing: -0.03em; margin-bottom: 1rem; }
+.contact-inner h2 em { font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--green); }
+.contact-inner p { color: var(--ink-soft); margin-bottom: 2rem; line-height: 1.8; }
+.contact-btns { display: flex; justify-content: center; gap: 0.8rem; flex-wrap: wrap; }
+footer { padding: 2rem 3rem; text-align: center; border-top: 1px solid rgba(0,0,0,0.05); }
+footer p { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-muted); }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  .reveal { opacity: 1 !important; transform: none !important; }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .hero-text { padding: 6rem 3rem 2rem; }
+  .panel { padding: 5rem 3rem; grid-template-columns: 1fr; }
+  .panel-text { max-width: 100%; padding: 0 !important; }
+  .panel.reverse .panel-text { order: 1; }
+  .panel.reverse .panel-visual { order: 2; }
+  .float-wrap { max-width: 360px; margin: 2rem auto 0; }
+  .stats { grid-template-columns: repeat(2,1fr); }
+  .skills-grid { grid-template-columns: 1fr; }
+  #timeline, #skills, #contact { padding: 4rem 3rem; }
+}
+@media (max-width: 768px) {
+  nav { padding: 1rem 1.5rem; }
+  .nav-links { display: none; }
+  .hero-text { padding: 5rem 1.5rem 1.5rem; }
+  .scene { aspect-ratio: auto; height: 50vw; min-height: 200px; }
+  .panel { padding: 4rem 1.5rem; min-height: auto; }
+  .stats { grid-template-columns: 1fr 1fr; }
+  .stat { padding: 1.5rem 1rem; }
+  #timeline, #skills, #contact { padding: 3rem 1.5rem; }
+  .tl-track { padding-left: 2rem; }
+  .tl-item::before { left: -2rem; }
+}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="nav-name">Ardian Candra</div>
+  <ul class="nav-links">
+    <li><a href="#hero">Home</a></li>
+    <li><a href="#stories">Projects</a></li>
+    <li><a href="#timeline">Timeline</a></li>
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- ═══════════════════════════════════════
+     HERO — ANIMATED SKETCH SCENE
+     ═══════════════════════════════════════ -->
+<section id="hero">
+
+  <!-- Text overlay (sits above the scene) -->
+  <div class="hero-text">
+    <div class="hero-dots reveal"><span style="background:var(--gold)"></span><span style="background:var(--green)"></span><span style="background:var(--blue)"></span></div>
+    <div class="hero-meta reveal reveal-delay-1"><span>KTH Stockholm</span><span>PT PLN Indonesia</span><span>10+ Years</span></div>
+    <h1 class="reveal reveal-delay-1">Designing the grid that powers <em>tomorrow.</em></h1>
+    <p class="hero-tagline reveal reveal-delay-2"><strong>Ardian Candra</strong> — Electrical &amp; sustainable energy engineer. A decade powering Indonesia's islands. Now researching PV+BESS systems at KTH.</p>
+    <div class="hero-cta reveal reveal-delay-3">
+      <a href="#stories" class="btn btn-dark">Explore Projects ↓</a>
+      <a href="#contact" class="btn btn-outline">Get in Touch</a>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       ANIMATED SCENE — Replace placeholders with your cropped PNGs
+       Change: <div class="placeholder">...</div>
+       To:     <img src="assets/filename.png" alt="description">
+       ═══════════════════════════════════ -->
+  <div class="scene" aria-label="Animated sustainable energy system illustration">
+
+    <!-- SKY -->
+    <div class="scene-layer layer-sun">
+      <div class="placeholder">sun.png</div>
+      <!-- <img src="assets/sun.png" alt="Sun"> -->
+    </div>
+    <div class="scene-layer layer-cloud-1">
+      <div class="placeholder">cloud-1.png</div>
+      <!-- <img src="assets/cloud-1.png" alt="Cloud"> -->
+    </div>
+    <div class="scene-layer layer-cloud-2">
+      <div class="placeholder">cloud-2.png</div>
+      <!-- <img src="assets/cloud-2.png" alt="Cloud"> -->
+    </div>
+
+    <!-- GROUND -->
+    <div class="scene-layer layer-ground">
+      <div class="placeholder">ground.png (full width horizon line)</div>
+      <!-- <img src="assets/ground.png" alt="Ground"> -->
+    </div>
+
+    <!-- UPPER SCENE -->
+    <div class="scene-layer layer-buildings">
+      <div class="placeholder">buildings.png<br>(2 buildings + trees)</div>
+      <!-- <img src="assets/buildings.png" alt="City buildings"> -->
+    </div>
+    <div class="scene-layer layer-bess">
+      <div class="placeholder">bess.png</div>
+      <!-- <img src="assets/bess.png" alt="Battery storage"> -->
+    </div>
+    <div class="scene-layer layer-solar">
+      <!-- <div class="placeholder">solar-pv.png</div> -->
+      <img src="assets/solar-pv.png" alt="Solar panels">
+    </div>
+    <div class="scene-layer layer-turbines">
+      <!-- <div class="placeholder">wind-turbines.png<br>(3 turbines + hill)</div> -->
+      <img src="assets/wind-turbines.png" alt="Wind turbines">
+    </div>
+
+    <!-- LOWER SCENE -->
+    <div class="scene-layer layer-ship">
+      <div class="placeholder">ship.png<br>(ferry + OPS cable)</div>
+      <!-- <img src="assets/ship.png" alt="Ship at dock"> -->
+    </div>
+    <div class="scene-layer layer-ops-plug">
+      <div class="placeholder">ops<br>plug</div>
+      <!-- <img src="assets/ops-plug.png" alt="OPS connection"> -->
+    </div>
+    <div class="scene-layer layer-ev-bus">
+      <div class="placeholder">ev-bus.png<br>(bus + charger)</div>
+      <!-- <img src="assets/ev-bus.png" alt="Electric bus"> -->
+    </div>
+    <div class="scene-layer layer-sub-plug">
+      <div class="placeholder">sub<br>plug</div>
+      <!-- <img src="assets/submarine-plug.png" alt="Submarine cable plug"> -->
+    </div>
+
+    <!-- WAVES (use a wide crop of the wave pattern) -->
+    <div class="scene-layer layer-waves">
+      <div class="placeholder" style="height:100%">waves.png — crop a wide strip of the wave pattern. The image scrolls horizontally automatically.</div>
+      <!-- <img src="assets/waves.png" alt="Ocean waves"> -->
+    </div>
+
+  </div>
+
+  <a href="#stats" class="scroll-arrow" aria-label="Scroll down">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </a>
+</section>
+
+<!-- STATS -->
+<div class="stats reveal" id="stats">
+  <div class="stat"><div class="stat-num">10+</div><div class="stat-label">Years Experience</div></div>
+  <div class="stat"><div class="stat-num">€3.4M</div><div class="stat-label">Annual Savings</div></div>
+  <div class="stat"><div class="stat-num">1,090</div><div class="stat-label">t CO₂/yr Reduced</div></div>
+  <div class="stat"><div class="stat-num">28 MW</div><div class="stat-label">Peak OPS Load</div></div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     STORIES — Each uses a cropped component image
+     Replace <div class="placeholder">...</div> with <img src="assets/...">
+     ═══════════════════════════════════════ -->
+<main id="stories">
+
+  <!-- 01 Solar PV -->
+  <section class="panel"><div class="panel-text">
+    <p class="label reveal"><span class="num">01</span> — PV System Design</p>
+    <h2 class="heading reveal reveal-delay-1">Ground-Mounted <em>Solar PV</em></h2>
+    <p class="body-text reveal reveal-delay-2">MSc thesis at KTH on <strong>techno-economic analysis of PV+BESS</strong> at Oskarshamn harbour (SE3). <strong>HelioScope 3D</strong> with Jinko Solar mono PERC 545W. Pareto front: <strong>standalone PV is economically superior</strong>.</p>
+    <div class="tags reveal reveal-delay-3"><span>HelioScope</span><span>Pyomo MILP</span><span>Pareto</span><span>SE3</span><span>Mono PERC</span></div>
+  </div><div class="panel-visual"><div class="float-wrap" data-speed="0.12">
+    <div class="blob" style="background:var(--blob-1)"></div>
+    <div class="placeholder" style="aspect-ratio:4/3">solar-pv.png<br>Reuse the same crop from hero</div>
+    <img src="assets/solar-pv.png" alt="Solar PV">
+  </div></div></section>
+
+  <!-- 02 Rooftop PV -->
+  <section class="panel reverse"><div class="panel-text">
+    <p class="label reveal"><span class="num">02</span> — Rooftop Modeling</p>
+    <h2 class="heading reveal reveal-delay-1">Rooftop <em>Solar PV</em></h2>
+    <p class="body-text reveal reveal-delay-2"><strong>Cargo terminal (2,290 kWp)</strong> and <strong>ferry terminal (839.3 kWp)</strong>. <strong>Ruan et al. (2024) snow loss model</strong> as Python post-processing.</p>
+    <div class="tags reveal reveal-delay-3"><span>2,290 kWp</span><span>839.3 kWp</span><span>Snow Loss</span><span>Python</span></div>
+  </div><div class="panel-visual"><div class="float-wrap" data-speed="0.10">
+    <div class="blob" style="background:var(--blob-2)"></div>
+    <div class="placeholder" style="aspect-ratio:4/3">buildings.png<br>(buildings have rooftop PV in sketch)</div>
+    <!-- <img src="assets/buildings.png" alt="Rooftop PV"> -->
+  </div></div></section>
+
+  <!-- 03 BESS -->
+  <section class="panel"><div class="panel-text">
+    <p class="label reveal"><span class="num">03</span> — Energy Storage</p>
+    <h2 class="heading reveal reveal-delay-1">Battery Energy <em>Storage</em></h2>
+    <p class="body-text reveal reveal-delay-2"><strong>MILP optimizer</strong> in Python/Pyomo, rolling horizon, <strong>6 cost components</strong>. LFP &amp; VRFB via <strong>PNNL ESGC</strong>. Pareto front across thousands of configs.</p>
+    <div class="tags reveal reveal-delay-3"><span>Python/Pyomo</span><span>MILP</span><span>LFP</span><span>VRFB</span><span>Pareto</span></div>
+  </div><div class="panel-visual"><div class="float-wrap" data-speed="0.11">
+    <div class="blob" style="background:var(--blob-3)"></div>
+    <div class="placeholder" style="aspect-ratio:4/3">bess.png</div>
+    <!-- <img src="assets/bess.png" alt="BESS"> -->
+  </div></div></section>
+
+  <!-- 04 Wind -->
+  <section class="panel reverse"><div class="panel-text">
+    <p class="label reveal"><span class="num">04</span> — Wind Energy</p>
+    <h2 class="heading reveal reveal-delay-1">Wind Power in <em>Sweden</em></h2>
+    <p class="body-text reveal reveal-delay-2">Complementary renewable in SE3. Context for BESS dispatch, aligned with <strong>Sweden Fossil-Free 2045</strong> and <strong>EU Green Deal</strong>.</p>
+    <div class="tags reveal reveal-delay-3"><span>SE3</span><span>EU Green Deal</span><span>Fossil-Free</span><span>Balancing</span></div>
+  </div><div class="panel-visual"><div class="float-wrap" data-speed="0.09">
+    <div class="blob" style="background:var(--blob-2)"></div>
+    <div class="placeholder" style="aspect-ratio:4/3">wind-turbines.png</div>
+    <!-- <img src="assets/wind-turbines.png" alt="Wind turbines"> -->
+  </div></div></section>
+
+  <!-- 05 OPS -->
+  <section class="panel"><div class="panel-text">
+    <p class="label reveal"><span class="num">05</span> — Port Electrification</p>
+    <h2 class="heading reveal reveal-delay-1">Onshore Power <em>Supply</em></h2>
+    <p class="body-text reveal reveal-delay-2"><strong>~28 MW peak</strong> cargo terminal. Decomposed OPS from building load via <strong>dP/dt</strong> on 15-min data.</p>
+    <div class="tags reveal reveal-delay-3"><span>28 MW</span><span>dP/dt</span><span>15-min Data</span><span>Shore Power</span></div>
+  </div><div class="panel-visual"><div class="float-wrap" data-speed="0.13">
+    <div class="blob" style="background:var(--blob-1)"></div>
+    <div class="placeholder" style="aspect-ratio:4/3">ship.png</div>
+    <!-- <img src="assets/ship.png" alt="Ship OPS"> -->
+  </div></div></section>
+
+  <!-- 06 Nuclear -->
+  <section class="panel reverse"><div class="panel-text">
+    <p class="label reveal"><span class="num">06</span> — Baseload</p>
+    <h2 class="heading reveal reveal-delay-1">Nuclear &amp; <em>SE3 Prices</em></h2>
+    <p class="body-text reveal reveal-delay-2"><strong>Stable baseload</strong> shaping SE3 price. <strong>ENTSO-E data</strong> via entsoe-py for BESS dispatch economics.</p>
+    <div class="tags reveal reveal-delay-3"><span>ENTSO-E</span><span>entsoe-py</span><span>SE3</span><span>Arbitrage</span></div>
+  </div><div class="panel-visual"><div class="float-wrap" data-speed="0.10">
+    <div class="blob" style="background:var(--blob-3)"></div>
+    <div class="placeholder" style="aspect-ratio:4/3">Generate a nuclear plant<br>in the same sketch style</div>
+  </div></div></section>
+
+  <!-- 07 CSP -->
+  <section class="panel"><div class="panel-text">
+    <p class="label reveal"><span class="num">07</span> — Solar Thermal</p>
+    <h2 class="heading reveal reveal-delay-1">Concentrated <em>Solar Power</em></h2>
+    <p class="body-text reveal reveal-delay-2"><strong>CSP with thermal storage</strong> — dispatchable solar complementing PV.</p>
+    <div class="tags reveal reveal-delay-3"><span>Solar Thermal</span><span>Dispatchable</span><span>DNI</span></div>
+  </div><div class="panel-visual"><div class="float-wrap" data-speed="0.08">
+    <div class="blob" style="background:var(--blob-1)"></div>
+    <div class="placeholder" style="aspect-ratio:4/3">Generate a CSP tower<br>in same sketch style</div>
+  </div></div></section>
+
+  <!-- 08 Urban Load -->
+  <section class="panel reverse"><div class="panel-text">
+    <p class="label reveal"><span class="num">08</span> — Load Characterization</p>
+    <h2 class="heading reveal reveal-delay-1">Urban &amp; Terminal <em>Load</em></h2>
+    <p class="body-text reveal reveal-delay-2"><strong>BDEW load profiles</strong>, area scaling (5,000 / 1,300 m²), 15-min data decomposition.</p>
+    <div class="tags reveal reveal-delay-3"><span>BDEW</span><span>Area Scaling</span><span>15-min Data</span></div>
+  </div><div class="panel-visual"><div class="float-wrap" data-speed="0.11">
+    <div class="blob" style="background:var(--blob-2)"></div>
+    <div class="placeholder" style="aspect-ratio:4/3">buildings.png<br>(reuse from hero)</div>
+    <!-- <img src="assets/buildings.png" alt="Buildings"> -->
+  </div></div></section>
+
+  <!-- 09 EVs -->
+  <section class="panel"><div class="panel-text">
+    <p class="label reveal"><span class="num">09</span> — E-Mobility</p>
+    <h2 class="heading reveal reveal-delay-1">EV Load &amp; <em>Distribution</em></h2>
+    <p class="body-text reveal reveal-delay-2"><strong>PT PLN distribution planning</strong> (Riau) — integrating <strong>EV charging load</strong> into network models.</p>
+    <div class="tags reveal reveal-delay-3"><span>PLN</span><span>EV Charging</span><span>Riau</span></div>
+  </div><div class="panel-visual"><div class="float-wrap" data-speed="0.12">
+    <div class="blob" style="background:var(--blob-3)"></div>
+    <div class="placeholder" style="aspect-ratio:4/3">ev-bus.png</div>
+    <!-- <img src="assets/ev-bus.png" alt="EV Bus"> -->
+  </div></div></section>
+
+  <!-- 10 Submarine Cable -->
+  <section class="panel reverse"><div class="panel-text">
+    <p class="label reveal"><span class="num">10</span> — Career Highlight</p>
+    <h2 class="heading reveal reveal-delay-1">Batam–Sambu <em>Submarine Cable</em></h2>
+    <p class="body-text reveal reveal-delay-2"><strong>Batam–Sambu interconnection</strong> — <strong>~€3.4M/yr savings</strong>, <strong>~1,090 t CO₂/yr</strong> reduction.</p>
+    <div class="tags reveal reveal-delay-3"><span>€3.4M</span><span>1,090 t CO₂</span><span>Submarine Cable</span><span>PT PLN</span></div>
+  </div><div class="panel-visual"><div class="float-wrap" data-speed="0.13">
+    <div class="blob" style="background:var(--blob-1)"></div>
+    <div class="placeholder" style="aspect-ratio:4/3">submarine-plug.png<br>+ waves from hero</div>
+  </div></div></section>
+
+</main>
+
+<!-- TIMELINE -->
+<section id="timeline">
+  <div class="timeline-header"><h2 class="reveal">Professional <em>Timeline</em></h2></div>
+  <div class="tl-track">
+    <div class="tl-item reveal"><span class="tl-year">2013 – 2016</span><h3 class="tl-title">SCADA & Telecom — PT PLN</h3><p class="tl-desc">SCADA and telecom across Riau and Riau Islands.</p></div>
+    <div class="tl-item hl reveal"><span class="tl-year">2016 – 2019</span><h3 class="tl-title">Batam–Sambu Submarine Cable</h3><p class="tl-desc">~€3.4M/yr savings, ~1,090 t CO₂/yr reduced.</p></div>
+    <div class="tl-item reveal"><span class="tl-year">2019 – 2023</span><h3 class="tl-title">Distribution Planning — PT PLN</h3><p class="tl-desc">Network expansion, load forecasting, EV integration.</p></div>
+    <div class="tl-item hl reveal"><span class="tl-year">2023</span><h3 class="tl-title">Swedish Institute Scholarship</h3><p class="tl-desc">Full scholarship for MSc at KTH Stockholm.</p></div>
+    <div class="tl-item reveal"><span class="tl-year">2024 – 2026</span><h3 class="tl-title">MSc — KTH Stockholm</h3><p class="tl-desc">PV+BESS techno-economics at Oskarshamn harbour.</p></div>
+    <div class="tl-item hl reveal"><span class="tl-year">2026</span><h3 class="tl-title">Current Focus</h3><p class="tl-desc">Thesis finalization, bridging PLN experience with Nordic renewables.</p></div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="skills-header"><h2 class="reveal">Skills &amp; <em>Tools</em></h2></div>
+  <div class="skills-grid">
+    <div class="skill-cat reveal"><h3><span class="dot" style="background:var(--green)"></span> Languages &amp; Tools</h3><div class="tags"><span>Python</span><span>Pyomo</span><span>MATLAB</span><span>LaTeX</span><span>HelioScope</span><span>ETAP</span><span>SCADA</span><span>JavaScript</span><span>Git</span></div></div>
+    <div class="skill-cat reveal reveal-delay-1"><h3><span class="dot" style="background:var(--gold)"></span> Domain Expertise</h3><div class="tags"><span>Power Systems</span><span>PV+BESS</span><span>Distribution Planning</span><span>Techno-Economic</span><span>Battery Degradation</span><span>MILP</span><span>Load Characterization</span></div></div>
+    <div class="skill-cat reveal reveal-delay-2"><h3><span class="dot" style="background:var(--blue)"></span> Policy</h3><div class="tags"><span>IMO GHG</span><span>EU ETS Maritime</span><span>Fossil-Free 2045</span><span>EU Green Deal</span><span>ENTSO-E</span><span>SE3</span></div></div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-inner">
+    <h2 class="reveal">Let's <em>connect.</em></h2>
+    <p class="reveal reveal-delay-1">Finishing my MSc at KTH. Open to opportunities in sustainable energy.</p>
+    <div class="contact-btns reveal reveal-delay-2">
+      <a href="mailto:ardian@example.com" class="btn btn-dark">Email ↗</a>
+      <a href="https://linkedin.com/in/" target="_blank" rel="noopener" class="btn btn-outline">LinkedIn ↗</a>
+      <a href="#" class="btn btn-outline">Download CV ↗</a>
+    </div>
+  </div>
+</section>
+
+<footer><p>Ardian Candra © 2026 — Built with ☕ and ⚡ in Stockholm</p></footer>
+
+<script>
+(function() {
+  'use strict';
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  // Nav
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 30), { passive: true });
+
+  // Scroll reveal
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // Floating parallax for story panels
+  const floats = [];
+  document.querySelectorAll('.float-wrap[data-speed]').forEach(el => {
+    floats.push({ el, speed: parseFloat(el.dataset.speed) || 0.1 });
+  });
+
+  function updateParallax() {
+    floats.forEach(({ el, speed }) => {
+      const panel = el.closest('.panel');
+      if (!panel) return;
+      const rect = panel.getBoundingClientRect();
+      const center = rect.top + rect.height / 2 - window.innerHeight / 2;
+      el.style.transform = 'translateY(' + (center * speed * -1).toFixed(1) + 'px)';
+    });
+  }
+
+  window.addEventListener('scroll', updateParallax, { passive: true });
+  updateParallax();
+})();
+</script>
+</body>
+</html>
