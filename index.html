@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Ardian Candra — Power System Automation &amp; Sustainable Energy Engineer</title>
 <meta name="description" content="Ardian Candra — 13a+ years powering Indonesia's islands. MSc at KTH Stockholm."/>
-<link rel="icon" type="image/png" href="ico-1.png"/>
+<link rel="icon" type="image/png" href="ico.ico"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Newsreader:ital,wght@0,400;0,600;1,400;1,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
@@ -484,11 +484,13 @@ footer p { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-muted);
 /* Responsive */
 @media (max-width: 1024px) {
   .hero-text { padding: 6rem 3rem 2rem; }
-  .panel { padding: 5rem 3rem; grid-template-columns: 1fr; }
+  .panel { padding: 5rem 3rem; grid-template-columns: 1fr; min-height: auto; }
+  .panel.reverse { grid-template-columns: 1fr; }
   .panel-text { max-width: 100%; padding: 0 !important; }
   .panel.reverse .panel-text { order: 1; }
   .panel.reverse .panel-visual { order: 2; }
   .float-wrap { max-width: 100%; margin: 2rem auto 0; }
+  .img-clip { aspect-ratio: 4/3; }
   .stats { grid-template-columns: repeat(2,1fr); }
   .skills-grid { grid-template-columns: 1fr; }
   #timeline, #skills, #contact { padding: 4rem 3rem; }
@@ -511,6 +513,8 @@ footer p { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-muted);
   #hero { min-height: auto; padding-bottom: 2rem; }
   .scene { aspect-ratio: auto; height: 50vw; min-height: 200px; }
   .panel { padding: 4rem 1.5rem; min-height: auto; }
+  .panel.reverse { grid-template-columns: 1fr; }
+  .img-clip { aspect-ratio: 16/9; }
   .stats { grid-template-columns: 1fr 1fr; }
   .stat { padding: 1.5rem 1rem; }
   #timeline, #skills, #contact { padding: 3rem 1.5rem; }
