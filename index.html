@@ -386,6 +386,91 @@ nav.scrolled {
 footer { padding: 2rem 3rem; text-align: center; border-top: 1px solid rgba(0,0,0,0.05); }
 footer p { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-muted); }
 
+/* ═══════════════════════════════════
+   REPORT MODAL
+   ═══════════════════════════════════ */
+.report-btn { margin-top: 1.25rem; }
+.btn-report {
+  background: transparent; border-color: var(--accent); color: var(--accent);
+  font-size: 0.82rem; padding: 0.65rem 1.4rem;
+}
+.btn-report:hover { background: var(--accent); color: white; text-decoration: none; }
+.report-modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(15,15,15,0.72); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+}
+.report-modal-overlay.open { opacity: 1; pointer-events: all; }
+.report-modal {
+  background: var(--cream); border-radius: 20px;
+  width: min(92vw, 960px); height: min(90vh, 720px);
+  display: flex; flex-direction: column; overflow: hidden;
+  transform: translateY(28px) scale(0.96);
+  transition: transform 0.38s cubic-bezier(0.22,1,0.36,1);
+  box-shadow: 0 32px 100px rgba(0,0,0,0.28);
+}
+.report-modal-overlay.open .report-modal { transform: translateY(0) scale(1); }
+.report-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.1rem 1.5rem; border-bottom: 1px solid rgba(0,0,0,0.07); flex-shrink: 0;
+}
+.report-modal-title {
+  font-family: var(--sans); font-weight: 700; font-size: 0.95rem;
+  color: var(--ink); max-width: 580px; line-height: 1.4;
+}
+.report-modal-subtitle {
+  font-family: var(--mono); font-size: 0.65rem; color: var(--accent);
+  text-transform: uppercase; letter-spacing: 0.12em; margin-top: 0.2rem;
+}
+.report-modal-actions { display: flex; gap: 0.6rem; align-items: center; flex-shrink: 0; }
+.report-modal-close {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 1.5px solid rgba(0,0,0,0.12); background: transparent;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  color: var(--ink-muted); transition: all 0.2s;
+}
+.report-modal-close:hover { border-color: var(--ink); color: var(--ink); }
+.report-modal-body { flex: 1; overflow: hidden; position: relative; background: #f0ece4; }
+.report-modal-body iframe { width: 100%; height: 100%; border: none; display: block; }
+.report-modal-loading {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100%; gap: 1rem;
+}
+.report-modal-spinner {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 2.5px solid rgba(0,0,0,0.08); border-top-color: var(--accent);
+  animation: reportSpin 0.75s linear infinite;
+}
+@keyframes reportSpin { to { transform: rotate(360deg); } }
+.report-modal-loading span {
+  font-family: var(--mono); font-size: 0.68rem; color: var(--ink-muted);
+  text-transform: uppercase; letter-spacing: 0.12em;
+}
+.report-wip {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100%; gap: 1.4rem; text-align: center; padding: 2.5rem;
+}
+.report-wip-icon { opacity: 0.18; }
+.report-wip-title {
+  font-family: var(--sans); font-weight: 700; font-size: 1.05rem; color: var(--ink);
+}
+.report-wip-desc {
+  font-size: 0.85rem; color: var(--ink-muted); line-height: 1.75;
+  max-width: 300px; font-family: var(--sans);
+}
+.report-wip-dots { display: flex; gap: 0.45rem; justify-content: center; margin-top: 0.25rem; }
+.report-wip-dots span {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+  opacity: 0.25; animation: wipPulse 1.5s ease-in-out infinite;
+}
+.report-wip-dots span:nth-child(2) { animation-delay: 0.25s; }
+.report-wip-dots span:nth-child(3) { animation-delay: 0.5s; }
+@keyframes wipPulse {
+  0%, 80%, 100% { opacity: 0.25; transform: scale(1); }
+  40%            { opacity: 1;    transform: scale(1.25); }
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
@@ -664,6 +749,9 @@ footer p { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-muted);
     Utilizing N-Type TOPCon (Tunnel Oxide Passivated Contact) technology for higher efficiency 
     and superior performance on the rooftop.</p>
     <div class="tags reveal reveal-delay-3"><span>HelioScope</span><span>N-Type TOPCon</span></div>
+    <div class="report-btn reveal reveal-delay-3">
+      <button onclick="openReport('Master Thesis: Sustainable Energy System Sizing for Oskarshamn Harbour','PV + BESS + Shore Power Integration','reports/thesis-oskarshamn.pdf')" class="btn btn-report">View Full Report ↗</button>
+    </div>
   </div><div class="panel-visual"><div class="float-wrap" data-speed="0.12">
     <div class="blob" style="background:var(--blob-1)"></div>
     <!-- <div class="placeholder" style="aspect-ratio:4/3">solar-pv.png<br>Reuse the same crop from hero</div> -->
@@ -676,22 +764,28 @@ footer p { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-muted);
     <h2 class="heading reveal reveal-delay-1">Rooftop <em>Solar PV</em></h2>
     <p class="body-text reveal reveal-delay-2"><strong>Cargo terminal (2,290 kWp)</strong> and <strong>ferry terminal (839.3 kWp)</strong>. <strong>Ruan et al. (2024) snow loss model</strong> as Python post-processing.</p>
     <div class="tags reveal reveal-delay-3"><span>2,290 kWp</span><span>839.3 kWp</span><span>Snow Loss</span><span>Python</span></div>
+    <div class="report-btn reveal reveal-delay-3">
+      <button onclick="openReport('Rooftop Solar PV — Cargo & Ferry Terminal Modeling','Cargo 2,290 kWp · Ferry 839.3 kWp · Snow Loss Post-Processing','reports/rooftop-pv.pdf')" class="btn btn-report">View Full Report ↗</button>
+    </div>
   </div><div class="panel-visual"><div class="float-wrap" data-speed="0.10">
     <div class="blob" style="background:var(--blob-2)"></div>
     <div class="placeholder" style="aspect-ratio:4/3">buildings.png<br>(buildings have rooftop PV in sketch)</div>
     <!-- <img src="assets/buildings.png" alt="Rooftop PV"> -->
   </div></div></section>
 
-  <!-- 03 BESS -->
+  <!-- 03 Kigali -->
   <section class="panel"><div class="panel-text">
-    <p class="label reveal"><span class="num">03</span> — Energy Storage</p>
-    <h2 class="heading reveal reveal-delay-1">Battery Energy <em>Storage</em></h2>
-    <p class="body-text reveal reveal-delay-2"><strong>MILP optimizer</strong> in Python/Pyomo, rolling horizon, <strong>6 cost components</strong>. LFP &amp; VRFB via <strong>PNNL ESGC</strong>. Pareto front across thousands of configs.</p>
-    <div class="tags reveal reveal-delay-3"><span>Python/Pyomo</span><span>MILP</span><span>LFP</span><span>VRFB</span><span>Pareto</span></div>
+    <p class="label reveal"><span class="num">03</span> — ENERGY MANAGEMENT </p>
+    <h2 class="heading reveal reveal-delay-1">ENERVISION PROJECT <em>KIGALI 2030</em></h2>
+    <p class="body-text reveal reveal-delay-2">This strategic study outlines a path to 90% energy self-sufficiency for Kigali’s Nyarugenge District by 2050. By comparing three investment pathways, the report champions the ambitious "Delulu" scenario—a high-innovation model that cuts transportation emissions by 56% through e-mobility and a new tram system. The framework replaces traditional firewood with district-wide biogas and transitions the grid to 88.8% renewable energy, primarily via rooftop solar and agrivoltaics. Despite higher initial capital requirements, this pathway significantly lowers the long-term cost of electricity ($0.178$ vs $0.239$ USD/kWh) while delivering superior environmental and social resilience for the region.</p>
+    <div class="tags reveal reveal-delay-3"><span>HomerPro</span><span>MCDA</span><span>Agrivoltaics</span><span>Rooftop PV</span><span>Biodigester</span></div>
+    <div class="report-btn reveal reveal-delay-3">
+      <button onclick="openReport('EnerVision Project — Kigali 2030','90% Energy Self-Sufficiency · Nyarugenge District · Delulu Scenario','reports/kigali-2030.pdf')" class="btn btn-report">View Full Report ↗</button>
+    </div>
   </div><div class="panel-visual"><div class="float-wrap" data-speed="0.11">
     <div class="blob" style="background:var(--blob-3)"></div>
-    <div class="placeholder" style="aspect-ratio:4/3">bess.png</div>
-    <!-- <img src="assets/bess.png" alt="BESS"> -->
+    <!-- <div class="placeholder" style="aspect-ratio:4/3">bess.png</div> -->
+    <img src="assets/energy management.png" alt="BESS">
   </div></div></section>
 
   <!-- 04 Wind -->
@@ -700,6 +794,9 @@ footer p { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-muted);
     <h2 class="heading reveal reveal-delay-1">Wind Power in <em>Sweden</em></h2>
     <p class="body-text reveal reveal-delay-2">Complementary renewable in SE3. Context for BESS dispatch, aligned with <strong>Sweden Fossil-Free 2045</strong> and <strong>EU Green Deal</strong>.</p>
     <div class="tags reveal reveal-delay-3"><span>SE3</span><span>EU Green Deal</span><span>Fossil-Free</span><span>Balancing</span></div>
+    <div class="report-btn reveal reveal-delay-3">
+      <button onclick="openReport('Wind Power in Sweden — SE3 Context','Complementary Renewable · BESS Dispatch · Fossil-Free 2045','reports/wind-sweden.pdf')" class="btn btn-report">View Full Report ↗</button>
+    </div>
   </div><div class="panel-visual"><div class="float-wrap" data-speed="0.09">
     <div class="blob" style="background:var(--blob-2)"></div>
     <div class="placeholder" style="aspect-ratio:4/3">wind-turbines.png</div>
@@ -712,6 +809,9 @@ footer p { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-muted);
     <h2 class="heading reveal reveal-delay-1">Onshore Power <em>Supply</em></h2>
     <p class="body-text reveal reveal-delay-2"><strong>~28 MW peak</strong> cargo terminal. Decomposed OPS from building load via <strong>dP/dt</strong> on 15-min data.</p>
     <div class="tags reveal reveal-delay-3"><span>28 MW</span><span>dP/dt</span><span>15-min Data</span><span>Shore Power</span></div>
+    <div class="report-btn reveal reveal-delay-3">
+      <button onclick="openReport('Onshore Power Supply — Oskarshamn Harbour','~28 MW Peak · dP/dt Load Decomposition · Shore Power Integration','reports/ops-shore-power.pdf')" class="btn btn-report">View Full Report ↗</button>
+    </div>
   </div><div class="panel-visual"><div class="float-wrap" data-speed="0.13">
     <div class="blob" style="background:var(--blob-1)"></div>
     <div class="placeholder" style="aspect-ratio:4/3">ship.png</div>
@@ -724,6 +824,9 @@ footer p { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-muted);
     <h2 class="heading reveal reveal-delay-1">Nuclear &amp; <em>SE3 Prices</em></h2>
     <p class="body-text reveal reveal-delay-2"><strong>Stable baseload</strong> shaping SE3 price. <strong>ENTSO-E data</strong> via entsoe-py for BESS dispatch economics.</p>
     <div class="tags reveal reveal-delay-3"><span>ENTSO-E</span><span>entsoe-py</span><span>SE3</span><span>Arbitrage</span></div>
+    <div class="report-btn reveal reveal-delay-3">
+      <button onclick="openReport('Nuclear & SE3 Electricity Price Analysis','Stable Baseload · ENTSO-E Data · BESS Dispatch Economics','reports/nuclear-se3.pdf')" class="btn btn-report">View Full Report ↗</button>
+    </div>
   </div><div class="panel-visual"><div class="float-wrap" data-speed="0.10">
     <div class="blob" style="background:var(--blob-3)"></div>
     <div class="placeholder" style="aspect-ratio:4/3">Generate a nuclear plant<br>in the same sketch style</div>
@@ -735,6 +838,9 @@ footer p { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-muted);
     <h2 class="heading reveal reveal-delay-1">Concentrated <em>Solar Power</em></h2>
     <p class="body-text reveal reveal-delay-2"><strong>CSP with thermal storage</strong> — dispatchable solar complementing PV.</p>
     <div class="tags reveal reveal-delay-3"><span>Solar Thermal</span><span>Dispatchable</span><span>DNI</span></div>
+    <div class="report-btn reveal reveal-delay-3">
+      <button onclick="openReport('Concentrated Solar Power with Thermal Storage','Dispatchable Solar · Thermal Storage · DNI Analysis','reports/csp.pdf')" class="btn btn-report">View Full Report ↗</button>
+    </div>
   </div><div class="panel-visual"><div class="float-wrap" data-speed="0.08">
     <div class="blob" style="background:var(--blob-1)"></div>
     <div class="placeholder" style="aspect-ratio:4/3">Generate a CSP tower<br>in same sketch style</div>
@@ -746,6 +852,9 @@ footer p { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-muted);
     <h2 class="heading reveal reveal-delay-1">Urban &amp; Terminal <em>Load</em></h2>
     <p class="body-text reveal reveal-delay-2"><strong>BDEW load profiles</strong>, area scaling (5,000 / 1,300 m²), 15-min data decomposition.</p>
     <div class="tags reveal reveal-delay-3"><span>BDEW</span><span>Area Scaling</span><span>15-min Data</span></div>
+    <div class="report-btn reveal reveal-delay-3">
+      <button onclick="openReport('Urban & Terminal Load Characterization','BDEW Profiles · 5,000 / 1,300 m² Scaling · 15-min Decomposition','reports/urban-load.pdf')" class="btn btn-report">View Full Report ↗</button>
+    </div>
   </div><div class="panel-visual"><div class="float-wrap" data-speed="0.11">
     <div class="blob" style="background:var(--blob-2)"></div>
     <div class="placeholder" style="aspect-ratio:4/3">buildings.png<br>(reuse from hero)</div>
@@ -758,6 +867,9 @@ footer p { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-muted);
     <h2 class="heading reveal reveal-delay-1">EV Load &amp; <em>Distribution</em></h2>
     <p class="body-text reveal reveal-delay-2"><strong>PT PLN distribution planning</strong> (Riau) — integrating <strong>EV charging load</strong> into network models.</p>
     <div class="tags reveal reveal-delay-3"><span>PLN</span><span>EV Charging</span><span>Riau</span></div>
+    <div class="report-btn reveal reveal-delay-3">
+      <button onclick="openReport('EV Load & Distribution Planning — Riau','PT PLN · EV Charging Integration · Network Load Modeling','reports/ev-distribution.pdf')" class="btn btn-report">View Full Report ↗</button>
+    </div>
   </div><div class="panel-visual"><div class="float-wrap" data-speed="0.12">
     <div class="blob" style="background:var(--blob-3)"></div>
     <div class="placeholder" style="aspect-ratio:4/3">ev-bus.png</div>
@@ -770,6 +882,9 @@ footer p { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-muted);
     <h2 class="heading reveal reveal-delay-1">Batam–Sambu <em>Submarine Cable</em></h2>
     <p class="body-text reveal reveal-delay-2"><strong>Batam–Sambu interconnection</strong> — <strong>~€3.4M/yr savings</strong>, <strong>~1,090 t CO₂/yr</strong> reduction.</p>
     <div class="tags reveal reveal-delay-3"><span>€3.4M</span><span>1,090 t CO₂</span><span>Submarine Cable</span><span>PT PLN</span></div>
+    <div class="report-btn reveal reveal-delay-3">
+      <button onclick="openReport('Batam–Sambu Submarine Cable Interconnection','€3.4M/yr Savings · 1,090 t CO₂/yr Reduced · PT PLN','reports/batam-sambu.pdf')" class="btn btn-report">View Full Report ↗</button>
+    </div>
   </div><div class="panel-visual"><div class="float-wrap" data-speed="0.13">
     <div class="blob" style="background:var(--blob-1)"></div>
     <div class="placeholder" style="aspect-ratio:4/3">submarine-plug.png<br>+ waves from hero</div>
@@ -815,6 +930,30 @@ footer p { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-muted);
 
 <footer><p>Ardian Candra © 2026 — Built with ☕ and ⚡ in Stockholm</p></footer>
 
+<!-- ═══════════════════════════════════════
+     REPORT MODAL
+     ═══════════════════════════════════════ -->
+<div class="report-modal-overlay" id="reportModal" role="dialog" aria-modal="true" aria-labelledby="reportModalTitle">
+  <div class="report-modal">
+    <div class="report-modal-header">
+      <div>
+        <div class="report-modal-title" id="reportModalTitle"></div>
+        <div class="report-modal-subtitle" id="reportModalSubtitle"></div>
+      </div>
+      <div class="report-modal-actions">
+        <a id="reportDownloadBtn" href="#" class="btn btn-report" style="margin-top:0;padding:0.55rem 1.2rem;font-size:0.78rem" download>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13" style="flex-shrink:0"><path d="M12 3v12M5 15l7 7 7-7"/><path d="M3 21h18"/></svg>
+          Download PDF
+        </a>
+        <button class="report-modal-close" id="reportModalClose" aria-label="Close modal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="report-modal-body" id="reportModalBody"></div>
+  </div>
+</div>
+
 <script>
 (function() {
   'use strict';
@@ -848,6 +987,64 @@ footer p { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-muted);
 
   window.addEventListener('scroll', updateParallax, { passive: true });
   updateParallax();
+
+  // Report modal
+  const reportOverlay = document.getElementById('reportModal');
+  const reportBody    = document.getElementById('reportModalBody');
+  const reportTitle   = document.getElementById('reportModalTitle');
+  const reportSub     = document.getElementById('reportModalSubtitle');
+  const reportDl      = document.getElementById('reportDownloadBtn');
+
+  function showLoading() {
+    reportBody.innerHTML = '<div class="report-modal-loading"><div class="report-modal-spinner"></div><span>Loading report…</span></div>';
+  }
+
+  function showWIP() {
+    reportDl.style.visibility = 'hidden';
+    reportBody.innerHTML = [
+      '<div class="report-wip">',
+        '<svg class="report-wip-icon" viewBox="0 0 72 72" fill="none" stroke="currentColor" stroke-width="1.5" width="88" height="88">',
+          '<rect x="12" y="6" width="40" height="52" rx="5"/>',
+          '<path d="M20 22h24M20 30h24M20 38h14"/>',
+          '<path d="M40 6v14h12" stroke-linejoin="round"/>',
+          '<circle cx="54" cy="56" r="12" stroke-width="1.5"/>',
+          '<path d="M54 51v5l3 3" stroke-linecap="round" stroke-linejoin="round"/>',
+        '</svg>',
+        '<div class="report-wip-title">Work in Progress</div>',
+        '<div class="report-wip-desc">This report is currently being prepared and will be available soon.</div>',
+        '<div class="report-wip-dots"><span></span><span></span><span></span></div>',
+      '</div>'
+    ].join('');
+  }
+
+  function showPDF(pdfPath, title) {
+    reportDl.style.visibility = '';
+    reportBody.innerHTML = '<iframe src="' + encodeURI(pdfPath) + '#toolbar=1" title="' + title.replace(/"/g, '') + '"></iframe>';
+  }
+
+  window.openReport = function(title, subtitle, pdfPath) {
+    reportTitle.textContent = title;
+    reportSub.textContent   = subtitle;
+    reportDl.href           = pdfPath;
+    reportDl.download       = pdfPath.split('/').pop();
+    showLoading();
+    reportOverlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    fetch(pdfPath, { method: 'HEAD' })
+      .then(res => { res.ok ? showPDF(pdfPath, title) : showWIP(); })
+      .catch(() => showWIP());
+  };
+
+  function closeReport() {
+    reportOverlay.classList.remove('open');
+    document.body.style.overflow = '';
+    setTimeout(() => { reportBody.innerHTML = ''; }, 350);
+  }
+
+  document.getElementById('reportModalClose').addEventListener('click', closeReport);
+  reportOverlay.addEventListener('click', e => { if (e.target === reportOverlay) closeReport(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && reportOverlay.classList.contains('open')) closeReport(); });
 })();
 </script>
 </body>
