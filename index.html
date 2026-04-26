@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Ardian Candra — Power System Automation &amp; Sustainable Energy Engineer</title>
 <meta name="description" content="Ardian Candra — 13a+ years powering Indonesia's islands. MSc at KTH Stockholm."/>
+<link rel="icon" type="image/png" href="ico.png"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Newsreader:ital,wght@0,400;0,600;1,400;1,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
@@ -317,19 +318,22 @@ nav.scrolled {
    PANELS (story sections)
    ═══════════════════════════════════ */
 .panel {
-  min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr;
+  min-height: 100vh; display: grid; grid-template-columns: 2fr 3fr;
   align-items: center; padding: 6rem 5rem; overflow: hidden;
 }
+.panel.reverse { grid-template-columns: 3fr 2fr; }
 .panel-text { max-width: 520px; padding-right: 2rem; }
 .panel-visual { display: flex; justify-content: center; align-items: center; position: relative; }
-.float-wrap { position: relative; width: 100%; max-width: 440px; will-change: transform; transition: transform 0.05s linear; }
-.float-wrap img { width: 100%; height: auto; position: relative; z-index: 2; }
-.blob { position: absolute; width: 110%; height: 110%; top: -5%; left: -5%; border-radius: 50% 40% 60% 30% / 50% 60% 40% 50%; z-index: 1; opacity: 0.55; animation: morphBlob 12s ease-in-out infinite alternate; }
-@keyframes morphBlob {
-  0%   { border-radius: 50% 40% 60% 30% / 50% 60% 40% 50%; transform: scale(1) rotate(0deg); }
-  33%  { border-radius: 40% 60% 30% 50% / 60% 30% 70% 40%; transform: scale(1.03) rotate(3deg); }
-  66%  { border-radius: 60% 30% 50% 40% / 40% 70% 30% 60%; transform: scale(0.97) rotate(-2deg); }
-  100% { border-radius: 30% 60% 40% 70% / 50% 40% 60% 30%; transform: scale(1.02) rotate(1deg); }
+.float-wrap { position: relative; width: 100%; will-change: transform; }
+.img-clip { overflow: hidden; width: 100%; aspect-ratio: 3/2; }
+.img-clip img {
+  display: block; width: 100%; height: 100%; object-fit: cover;
+  transform: scale(1.08); will-change: transform;
+  transition: transform 0.35s ease-in;
+}
+.img-clip img.img-zoomed {
+  transform: scale(1.15);
+  transition: transform 2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 .panel.reverse .panel-text { order: 2; padding-right: 0; padding-left: 2rem; }
 .panel.reverse .panel-visual { order: 1; }
@@ -484,7 +488,7 @@ footer p { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-muted);
   .panel-text { max-width: 100%; padding: 0 !important; }
   .panel.reverse .panel-text { order: 1; }
   .panel.reverse .panel-visual { order: 2; }
-  .float-wrap { max-width: 360px; margin: 2rem auto 0; }
+  .float-wrap { max-width: 100%; margin: 2rem auto 0; }
   .stats { grid-template-columns: repeat(2,1fr); }
   .skills-grid { grid-template-columns: 1fr; }
   #timeline, #skills, #contact { padding: 4rem 3rem; }
@@ -938,6 +942,29 @@ footer p { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-muted);
   window.addEventListener('scroll', updateParallax, { passive: true });
   updateParallax();
 
+  // Zoom-on-scroll-stop for story images
+  let imgClips = [];
+  let zoomTimer = null;
+
+  function zoomVisibleImages() {
+    imgClips.forEach(img => {
+      const panel = img.closest('.panel');
+      if (!panel) return;
+      const rect = panel.getBoundingClientRect();
+      if (rect.top < window.innerHeight * 0.9 && rect.bottom > window.innerHeight * 0.1) {
+        img.classList.add('img-zoomed');
+      }
+    });
+  }
+
+  function onScrollZoom() {
+    imgClips.forEach(img => img.classList.remove('img-zoomed'));
+    clearTimeout(zoomTimer);
+    zoomTimer = setTimeout(zoomVisibleImages, 420);
+  }
+
+  window.addEventListener('scroll', onScrollZoom, { passive: true });
+
   // Load stories section from external file
   fetch('stories.html')
     .then(r => r.text())
@@ -948,7 +975,9 @@ footer p { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-muted);
       container.querySelectorAll('.float-wrap[data-speed]').forEach(el => {
         floats.push({ el, speed: parseFloat(el.dataset.speed) || 0.1 });
       });
+      imgClips = Array.from(container.querySelectorAll('.img-clip img'));
       updateParallax();
+      zoomVisibleImages();
     })
     .catch(() => {});
 
