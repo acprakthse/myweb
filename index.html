@@ -734,164 +734,7 @@ footer p { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-muted);
   <div class="stat"><div class="stat-num">28 MW</div><div class="stat-label">Peak OPS Load</div></div>
 </div>
 
-<!-- ═══════════════════════════════════════
-     STORIES — Each uses a cropped component image
-     Replace <div class="placeholder">...</div> with <img src="assets/...">
-     ═══════════════════════════════════════ -->
-<main id="stories">
-
-  <!-- 01 Oskarshamn Harbour -->
-  <section class="panel"><div class="panel-text">
-    <p class="label reveal"><span class="num">01</span> — Master Thesis: SUSTAINABLE ENERGY SYSTEM SIZING FOR OSKARSHAMN HARBOUR Part 1</p>
-    <h2 class="heading reveal reveal-delay-1">PV, BESS, and <br> SHORE POWER INTEGRATION<br>
-    <em>Rooftop PV Modeling</em></h2>
-    <p class="body-text reveal reveal-delay-2">Modeling Rooftop PV of the terminal building using HelioScope 3D to optimize power generation. 
-    Utilizing N-Type TOPCon (Tunnel Oxide Passivated Contact) technology for higher efficiency 
-    and superior performance on the rooftop.</p>
-    <div class="tags reveal reveal-delay-3"><span>HelioScope</span><span>N-Type TOPCon</span></div>
-    <div class="report-btn reveal reveal-delay-3">
-      <button onclick="openReport('Master Thesis: Sustainable Energy System Sizing for Oskarshamn Harbour','PV + BESS + Shore Power Integration','reports/thesis-oskarshamn.pdf')" class="btn btn-report">View Full Report ↗</button>
-    </div>
-  </div><div class="panel-visual"><div class="float-wrap" data-speed="0.12">
-    <div class="blob" style="background:var(--blob-1)"></div>
-    <!-- <div class="placeholder" style="aspect-ratio:4/3">solar-pv.png<br>Reuse the same crop from hero</div> -->
-    <img src="assets/helioscope.png" alt="Solar PV" width="1000" height="500">
-  </div></div></section>
-
-  <!-- 02 Oskarshamn Harbour -->
-  <section class="panel reverse"><div class="panel-text">
-    <p class="label reveal"><span class="num">02</span> — Master Thesis: SUSTAINABLE ENERGY SYSTEM SIZING FOR OSKARSHAMN HARBOUR Part 2</p>
-    <h2 class="heading reveal reveal-delay-1">PV, BESS, and <br> SHORE POWER INTEGRATION<br>
-    <em>System Modeling</em></h2>
-    <p class="body-text reveal reveal-delay-2">A techno-economic optimization framework that automates sizing and dispatch of rooftop PV and storage. It combines HelioScope solar modeling with a Pyomo-based battery dispatch model, and uses a Genetic Algorithm to optimize battery size and power based on KPIs like LCOE, NPV, and self-sufficiency, delivering a cost-effective and resilient system design.</p>
-    <div class="tags reveal reveal-delay-3"><span>2,290 kWp</span><span>839.3 kWp</span><span>Snow Loss</span><span>Python</span></div>
-    <div class="report-btn reveal reveal-delay-3">
-      <button onclick="openReport('Rooftop Solar PV — Cargo & Ferry Terminal Modeling','Cargo 2,290 kWp · Ferry 839.3 kWp · Snow Loss Post-Processing','reports/rooftop-pv.pdf')" class="btn btn-report">View Full Report ↗</button>
-    </div>
-  </div><div class="panel-visual"><div class="float-wrap" data-speed="0.10">
-    <div class="blob" style="background:var(--blob-2)"></div>
-    <img src="assets/method.png" alt="Rooftop PV">
-  </div></div></section>
-
-  <!-- 03 Kigali -->
-  <section class="panel"><div class="panel-text">
-    <p class="label reveal"><span class="num">03</span> — ENERGY MANAGEMENT </p>
-    <h2 class="heading reveal reveal-delay-1">ENERVISION PROJECT  <br><em>KIGALI 2030</em></h2>
-    <p class="body-text reveal reveal-delay-2">This study outlines a path to 90% energy self-sufficiency for Kigali’s Nyarugenge District by 2050. It compares three investment pathways and highlights the ambitious "Delulu" scenario, which cuts transport emissions by 56% through e-mobility and a tram system. It replaces firewood with district-wide biogas and shifts the grid to 88.8% renewables, mainly rooftop solar and agrivoltaics. Despite higher upfront costs, it lowers long-term electricity costs (0.178 vs 0.239 USD/kWh) and improves environmental and social resilience.
-</p>
-    <div class="tags reveal reveal-delay-3"><span>HomerPro</span><span>MCDA</span><span>Agrivoltaics</span><span>Rooftop PV</span><span>Biodigester</span></div>
-    <div class="report-btn reveal reveal-delay-3">
-      <button onclick="openReport('EnerVision Project — Kigali 2030','90% Energy Self-Sufficiency · Nyarugenge District · Delulu Scenario','reports/kigali-2030.pdf')" class="btn btn-report">View Full Report ↗</button>
-    </div>
-  </div><div class="panel-visual"><div class="float-wrap" data-speed="0.11">
-    <div class="blob" style="background:var(--blob-3)"></div>
-    <!-- <div class="placeholder" style="aspect-ratio:4/3">bess.png</div> -->
-    <img src="assets/energy management.png" alt="BESS">
-  </div></div></section>
-
-  <!-- 04 CSP–PV hybrid plant -->
-  <section class="panel reverse"><div class="panel-text">
-    <p class="label reveal"><span class="num">04</span> — CSP–PV hybrid plant</p>
-    <h2 class="heading reveal reveal-delay-1">CSP–PV Hybrid Plant in <em>Spain</em></h2>
-    <p class="body-text reveal reveal-delay-2">The report presents a techno-economic pre-feasibility study of a CSP–PV hybrid plant in southern Spain, using a Genetic Algorithm to identify an optimal design with 142 MWdc PV, 50 MWel CSP, and 8 hours of thermal storage. The system achieves a base price of 52.59 USD/MWh and an LCOE of 75.70 USD/MWh while meeting grid and dispatch constraints, and it also supports sustainability goals and local job creation.</p>
-    <div class="tags reveal reveal-delay-3"><span>MILP</span><span>Genetic Algorithm</span><span>Pareto Front</span><span>TES</span><span>PV-CSP</span><span>PySAM</span></div>
-    <div class="report-btn reveal reveal-delay-3">
-      <button onclick="openReport('CSP–PV Hybrid Plant in Spain','Genetic Algorithm · Pareto Front · TES','reports/solar-report.pdf')" class="btn btn-report">View Full Report ↗</button>
-    </div>
-  </div><div class="panel-visual"><div class="float-wrap" data-speed="0.09">
-    <div class="blob" style="background:var(--blob-2)"></div>
-    <!-- <div class="placeholder" style="aspect-ratio:4/3">wind-turbines.png</div> -->
-    <img src="assets/csp.png" alt="CSP plant">
-  </div></div></section>
-
-  <!-- 05 OPS -->
-  <section class="panel"><div class="panel-text">
-    <p class="label reveal"><span class="num">05</span> — Port Electrification</p>
-    <h2 class="heading reveal reveal-delay-1">Onshore Power <em>Supply</em></h2>
-    <p class="body-text reveal reveal-delay-2"><strong>~28 MW peak</strong> cargo terminal. Decomposed OPS from building load via <strong>dP/dt</strong> on 15-min data.</p>
-    <div class="tags reveal reveal-delay-3"><span>28 MW</span><span>dP/dt</span><span>15-min Data</span><span>Shore Power</span></div>
-    <div class="report-btn reveal reveal-delay-3">
-      <button onclick="openReport('Onshore Power Supply — Oskarshamn Harbour','~28 MW Peak · dP/dt Load Decomposition · Shore Power Integration','reports/ops-shore-power.pdf')" class="btn btn-report">View Full Report ↗</button>
-    </div>
-  </div><div class="panel-visual"><div class="float-wrap" data-speed="0.13">
-    <div class="blob" style="background:var(--blob-1)"></div>
-    <div class="placeholder" style="aspect-ratio:4/3">ship.png</div>
-    <!-- <img src="assets/ship.png" alt="Ship OPS"> -->
-  </div></div></section>
-
-  <!-- 06 Nuclear -->
-  <section class="panel reverse"><div class="panel-text">
-    <p class="label reveal"><span class="num">06</span> — Baseload</p>
-    <h2 class="heading reveal reveal-delay-1">Nuclear &amp; <em>SE3 Prices</em></h2>
-    <p class="body-text reveal reveal-delay-2"><strong>Stable baseload</strong> shaping SE3 price. <strong>ENTSO-E data</strong> via entsoe-py for BESS dispatch economics.</p>
-    <div class="tags reveal reveal-delay-3"><span>ENTSO-E</span><span>entsoe-py</span><span>SE3</span><span>Arbitrage</span></div>
-    <div class="report-btn reveal reveal-delay-3">
-      <button onclick="openReport('Nuclear & SE3 Electricity Price Analysis','Stable Baseload · ENTSO-E Data · BESS Dispatch Economics','reports/nuclear-se3.pdf')" class="btn btn-report">View Full Report ↗</button>
-    </div>
-  </div><div class="panel-visual"><div class="float-wrap" data-speed="0.10">
-    <div class="blob" style="background:var(--blob-3)"></div>
-    <div class="placeholder" style="aspect-ratio:4/3">Generate a nuclear plant<br>in the same sketch style</div>
-  </div></div></section>
-
-  <!-- 07 CSP -->
-  <section class="panel"><div class="panel-text">
-    <p class="label reveal"><span class="num">07</span> — Solar Thermal</p>
-    <h2 class="heading reveal reveal-delay-1">Concentrated <em>Solar Power</em></h2>
-    <p class="body-text reveal reveal-delay-2"><strong>CSP with thermal storage</strong> — dispatchable solar complementing PV.</p>
-    <div class="tags reveal reveal-delay-3"><span>Solar Thermal</span><span>Dispatchable</span><span>DNI</span></div>
-    <div class="report-btn reveal reveal-delay-3">
-      <button onclick="openReport('Concentrated Solar Power with Thermal Storage','Dispatchable Solar · Thermal Storage · DNI Analysis','reports/csp.pdf')" class="btn btn-report">View Full Report ↗</button>
-    </div>
-  </div><div class="panel-visual"><div class="float-wrap" data-speed="0.08">
-    <div class="blob" style="background:var(--blob-1)"></div>
-    <div class="placeholder" style="aspect-ratio:4/3">Generate a CSP tower<br>in same sketch style</div>
-  </div></div></section>
-
-  <!-- 08 Urban Load -->
-  <section class="panel reverse"><div class="panel-text">
-    <p class="label reveal"><span class="num">08</span> — Load Characterization</p>
-    <h2 class="heading reveal reveal-delay-1">Urban &amp; Terminal <em>Load</em></h2>
-    <p class="body-text reveal reveal-delay-2"><strong>BDEW load profiles</strong>, area scaling (5,000 / 1,300 m²), 15-min data decomposition.</p>
-    <div class="tags reveal reveal-delay-3"><span>BDEW</span><span>Area Scaling</span><span>15-min Data</span></div>
-    <div class="report-btn reveal reveal-delay-3">
-      <button onclick="openReport('Urban & Terminal Load Characterization','BDEW Profiles · 5,000 / 1,300 m² Scaling · 15-min Decomposition','reports/urban-load.pdf')" class="btn btn-report">View Full Report ↗</button>
-    </div>
-  </div><div class="panel-visual"><div class="float-wrap" data-speed="0.11">
-    <div class="blob" style="background:var(--blob-2)"></div>
-    <div class="placeholder" style="aspect-ratio:4/3">buildings.png<br>(reuse from hero)</div>
-    <!-- <img src="assets/buildings.png" alt="Buildings"> -->
-  </div></div></section>
-
-  <!-- 09 EVs -->
-  <section class="panel"><div class="panel-text">
-    <p class="label reveal"><span class="num">09</span> — E-Mobility</p>
-    <h2 class="heading reveal reveal-delay-1">EV Load &amp; <em>Distribution</em></h2>
-    <p class="body-text reveal reveal-delay-2"><strong>PT PLN distribution planning</strong> (Riau) — integrating <strong>EV charging load</strong> into network models.</p>
-    <div class="tags reveal reveal-delay-3"><span>PLN</span><span>EV Charging</span><span>Riau</span></div>
-    <div class="report-btn reveal reveal-delay-3">
-      <button onclick="openReport('EV Load & Distribution Planning — Riau','PT PLN · EV Charging Integration · Network Load Modeling','reports/ev-distribution.pdf')" class="btn btn-report">View Full Report ↗</button>
-    </div>
-  </div><div class="panel-visual"><div class="float-wrap" data-speed="0.12">
-    <div class="blob" style="background:var(--blob-3)"></div>
-    <div class="placeholder" style="aspect-ratio:4/3">ev-bus.png</div>
-    <!-- <img src="assets/ev-bus.png" alt="EV Bus"> -->
-  </div></div></section>
-
-  <!-- 10 Submarine Cable -->
-  <section class="panel reverse"><div class="panel-text">
-    <p class="label reveal"><span class="num">10</span> — Career Highlight</p>
-    <h2 class="heading reveal reveal-delay-1">Batam–Sambu <em>Submarine Cable</em></h2>
-    <p class="body-text reveal reveal-delay-2"><strong>Batam–Sambu interconnection</strong> — <strong>~€3.4M/yr savings</strong>, <strong>~1,090 t CO₂/yr</strong> reduction.</p>
-    <div class="tags reveal reveal-delay-3"><span>€3.4M</span><span>1,090 t CO₂</span><span>Submarine Cable</span><span>PT PLN</span></div>
-    <div class="report-btn reveal reveal-delay-3">
-      <button onclick="openReport('Batam–Sambu Submarine Cable Interconnection','€3.4M/yr Savings · 1,090 t CO₂/yr Reduced · PT PLN','reports/batam-sambu.pdf')" class="btn btn-report">View Full Report ↗</button>
-    </div>
-  </div><div class="panel-visual"><div class="float-wrap" data-speed="0.13">
-    <div class="blob" style="background:var(--blob-1)"></div>
-    <div class="placeholder" style="aspect-ratio:4/3">submarine-plug.png<br>+ waves from hero</div>
-  </div></div></section>
-
-</main>
+<div id="stories-container"></div>
 
 <!-- TIMELINE -->
 <section id="timeline">
@@ -988,6 +831,20 @@ footer p { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-muted);
 
   window.addEventListener('scroll', updateParallax, { passive: true });
   updateParallax();
+
+  // Load stories section from external file
+  fetch('stories.html')
+    .then(r => r.text())
+    .then(html => {
+      const container = document.getElementById('stories-container');
+      container.innerHTML = html;
+      container.querySelectorAll('.reveal').forEach(el => io.observe(el));
+      container.querySelectorAll('.float-wrap[data-speed]').forEach(el => {
+        floats.push({ el, speed: parseFloat(el.dataset.speed) || 0.1 });
+      });
+      updateParallax();
+    })
+    .catch(() => {});
 
   // Report modal
   const reportOverlay = document.getElementById('reportModal');
