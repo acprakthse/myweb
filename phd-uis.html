@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PhD Application — Extended References · Ardian Candra</title>
+<meta name="description" content="Extended references and supplementary materials for Ardian Candra's PhD fellowship application at the University of Stavanger (UiS)."/>
+<link rel="icon" type="image/png" href="assets/ico.ico"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=Newsreader:ital,wght@0,400;0,600;1,400;1,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+
+:root {
+  --cream: #faf8f4;
+  --warm-white: #f5f0e8;
+  --ink: #1a1a1a;
+  --ink-soft: #4a4a4a;
+  --ink-muted: #8a8a8a;
+  --accent: #c8a04a;
+  --green: #2d6a4f;
+  --blue: #1d3557;
+  --gold: #d4a843;
+  --sans: 'Instrument Sans', sans-serif;
+  --serif: 'Newsreader', Georgia, serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--sans); background: var(--cream); color: var(--ink);
+  line-height: 1.7; overflow-x: hidden; -webkit-font-smoothing: antialiased;
+}
+a { color: var(--green); text-decoration: none; }
+a:hover { text-decoration: underline; }
+::selection { background: var(--accent); color: white; }
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 1.25rem 3rem;
+  display: flex; justify-content: space-between; align-items: center;
+  transition: all 0.4s ease;
+}
+nav.scrolled {
+  background: rgba(250,248,244,0.92);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.05);
+}
+.nav-name { font-family: var(--serif); font-weight: 600; font-size: 1.1rem; }
+.nav-links { display: flex; gap: 2rem; list-style: none; }
+.nav-links a { color: var(--ink-muted); font-size: 0.85rem; font-weight: 500; transition: color 0.3s; }
+.nav-links a:hover { color: var(--ink); text-decoration: none; }
+
+/* REVEAL */
+.reveal {
+  opacity: 0; transform: translateY(32px);
+  transition: opacity 0.9s cubic-bezier(0.22,1,0.36,1), transform 0.9s cubic-bezier(0.22,1,0.36,1);
+}
+.reveal.in { opacity: 1; transform: translateY(0); }
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+
+/* PAGE HEADER */
+.page-header {
+  padding: 9rem 5rem 5rem;
+  background: var(--warm-white);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.page-header-inner { max-width: 800px; }
+.breadcrumb {
+  font-family: var(--mono); font-size: 0.68rem; text-transform: uppercase;
+  letter-spacing: 0.15em; color: var(--ink-muted); margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 0.6rem;
+}
+.breadcrumb a { color: var(--ink-muted); }
+.breadcrumb a:hover { color: var(--ink); }
+.breadcrumb-sep { color: var(--accent); }
+.page-header-tag {
+  font-family: var(--mono); font-size: 0.7rem; text-transform: uppercase;
+  letter-spacing: 0.18em; color: var(--accent); margin-bottom: 1rem;
+}
+.page-header h1 {
+  font-family: var(--sans); font-weight: 800;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  line-height: 1.05; letter-spacing: -0.04em; margin-bottom: 1.25rem;
+}
+.page-header h1 em {
+  font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--green);
+}
+.page-header-desc {
+  font-size: 1.05rem; color: var(--ink-soft); line-height: 1.8;
+  max-width: 620px; margin-bottom: 2rem;
+}
+.header-meta {
+  display: flex; gap: 1.5rem; flex-wrap: wrap;
+  font-family: var(--mono); font-size: 0.65rem;
+  text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-muted);
+}
+.header-meta span { display: flex; align-items: center; gap: 0.4rem; }
+.header-meta span::before { content: "◦"; color: var(--accent); }
+
+/* MAIN CONTENT */
+.content-wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 5rem 3rem;
+}
+
+/* SECTION TITLE */
+.section-label {
+  font-family: var(--mono); font-size: 0.7rem; text-transform: uppercase;
+  letter-spacing: 0.18em; color: var(--ink-muted); margin-bottom: 0.75rem;
+}
+.section-label .num { color: var(--accent); font-weight: 600; }
+.section-heading {
+  font-family: var(--sans); font-weight: 800;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 1rem;
+}
+.section-heading em {
+  font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--green);
+}
+.section-intro {
+  font-size: 1rem; color: var(--ink-soft); line-height: 1.8;
+  max-width: 680px; margin-bottom: 3rem;
+}
+
+/* DIVIDER */
+.divider {
+  border: none; border-top: 1px solid rgba(0,0,0,0.07);
+  margin: 4rem 0;
+}
+
+/* REFERENCE LIST */
+.ref-list {
+  display: flex; flex-direction: column; gap: 1.5rem;
+  counter-reset: refcount;
+}
+
+.ref-item {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr;
+  gap: 0.75rem 1rem;
+  padding: 1.5rem;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 14px;
+  background: white;
+  transition: border-color 0.25s, box-shadow 0.25s;
+  counter-increment: refcount;
+}
+.ref-item:hover {
+  border-color: rgba(200,160,74,0.35);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.ref-num {
+  font-family: var(--mono); font-size: 0.75rem;
+  color: var(--accent); font-weight: 600;
+  padding-top: 0.2rem;
+  line-height: 1;
+}
+
+.ref-body {}
+
+.ref-title {
+  font-weight: 600; font-size: 0.97rem; color: var(--ink);
+  line-height: 1.5; margin-bottom: 0.3rem;
+}
+
+.ref-authors {
+  font-size: 0.83rem; color: var(--ink-soft); line-height: 1.6; margin-bottom: 0.35rem;
+}
+
+.ref-journal {
+  font-family: var(--mono); font-size: 0.68rem; color: var(--ink-muted);
+  letter-spacing: 0.04em; margin-bottom: 0.6rem;
+}
+
+.ref-tags {
+  display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center;
+}
+.ref-tag {
+  font-family: var(--mono); font-size: 0.6rem; padding: 0.2rem 0.6rem;
+  border: 1px solid rgba(0,0,0,0.1); border-radius: 100px;
+  color: var(--ink-soft); transition: all 0.2s;
+}
+.ref-item:hover .ref-tag { border-color: rgba(200,160,74,0.4); }
+
+.ref-doi {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  font-family: var(--mono); font-size: 0.6rem; color: var(--green);
+  border: 1px solid rgba(45,106,79,0.2); border-radius: 100px;
+  padding: 0.2rem 0.6rem; transition: all 0.2s; text-decoration: none;
+}
+.ref-doi:hover {
+  background: var(--green); color: white; border-color: var(--green);
+  text-decoration: none;
+}
+.ref-doi svg { flex-shrink: 0; }
+
+/* BIBTEX BLOCK */
+.bibtex-section { margin-top: 1rem; }
+.bibtex-toggle {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  font-family: var(--mono); font-size: 0.62rem; text-transform: uppercase;
+  letter-spacing: 0.12em; color: var(--ink-muted);
+  background: none; border: none; cursor: pointer; padding: 0;
+  transition: color 0.2s;
+}
+.bibtex-toggle:hover { color: var(--ink); }
+.bibtex-toggle svg { transition: transform 0.25s; }
+.bibtex-toggle.open svg { transform: rotate(90deg); }
+
+.bibtex-code {
+  display: none; margin-top: 0.75rem;
+  background: var(--cream);
+  border: 1px solid rgba(0,0,0,0.07);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  font-family: var(--mono); font-size: 0.7rem;
+  color: var(--ink-soft); line-height: 1.9;
+  overflow-x: auto; white-space: pre;
+  position: relative;
+}
+.bibtex-code.open { display: block; }
+.copy-btn {
+  position: absolute; top: 0.6rem; right: 0.6rem;
+  font-family: var(--mono); font-size: 0.58rem; text-transform: uppercase;
+  letter-spacing: 0.1em; background: white; color: var(--ink-muted);
+  border: 1px solid rgba(0,0,0,0.1); border-radius: 6px;
+  padding: 0.25rem 0.55rem; cursor: pointer; transition: all 0.2s;
+}
+.copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+.copy-btn.copied { border-color: var(--green); color: var(--green); }
+
+/* INFO BOX */
+.info-box {
+  background: white;
+  border: 1px solid rgba(0,0,0,0.07);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 12px 12px 0;
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 3rem;
+}
+.info-box-label {
+  font-family: var(--mono); font-size: 0.65rem; text-transform: uppercase;
+  letter-spacing: 0.14em; color: var(--accent); margin-bottom: 0.5rem;
+}
+.info-box p {
+  font-size: 0.9rem; color: var(--ink-soft); line-height: 1.75;
+}
+.info-box strong { color: var(--ink); }
+
+/* CONTACT */
+#contact-strip {
+  background: var(--warm-white);
+  padding: 4rem 5rem;
+  border-top: 1px solid rgba(0,0,0,0.06);
+  text-align: center;
+}
+#contact-strip h2 {
+  font-family: var(--sans); font-weight: 800;
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  letter-spacing: -0.03em; margin-bottom: 0.75rem;
+}
+#contact-strip h2 em {
+  font-family: var(--serif); font-style: italic;
+  font-weight: 400; color: var(--green);
+}
+#contact-strip p { color: var(--ink-soft); font-size: 0.95rem; margin-bottom: 1.75rem; }
+.btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.85rem 1.75rem; font-family: var(--sans); font-size: 0.88rem;
+  font-weight: 600; border-radius: 100px; border: 1.5px solid transparent;
+  cursor: pointer; transition: all 0.3s; text-decoration: none;
+}
+.btn-dark { background: var(--ink); color: var(--cream); }
+.btn-dark:hover { background: var(--green); text-decoration: none; }
+.btn-outline { border-color: rgba(0,0,0,0.15); color: var(--ink); background: transparent; }
+.btn-outline:hover { border-color: var(--ink); text-decoration: none; }
+.contact-btns { display: flex; justify-content: center; gap: 0.8rem; flex-wrap: wrap; }
+
+footer { padding: 2rem 3rem; text-align: center; border-top: 1px solid rgba(0,0,0,0.05); }
+footer p { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-muted); }
+
+/* RESPONSIVE */
+@media (max-width: 800px) {
+  nav { padding: 1rem 1.5rem; }
+  .nav-links { display: none; }
+  .page-header { padding: 7rem 1.75rem 3rem; }
+  .content-wrap { padding: 3rem 1.75rem; }
+  #contact-strip { padding: 3rem 1.75rem; }
+  .ref-item { grid-template-columns: 1fr; }
+  .ref-num { font-size: 0.65rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  .reveal { opacity: 1 !important; transform: none !important; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="/" class="nav-name">Ardian Candra</a>
+  <ul class="nav-links">
+    <li><a href="/#timeline">Timeline</a></li>
+    <li><a href="/#skills">Skills</a></li>
+    <li><a href="/#contact">Contact</a></li>
+    <li><a href="/phd-uis.html" style="color:var(--accent)">PhD · UiS</a></li>
+  </ul>
+</nav>
+
+<!-- PAGE HEADER -->
+<header class="page-header">
+  <div class="page-header-inner">
+    <div class="breadcrumb reveal">
+      <a href="/">ardiancandra.com</a>
+      <span class="breadcrumb-sep">›</span>
+      phd-uis
+    </div>
+    <div class="page-header-tag reveal reveal-delay-1">PhD Fellowship Application · University of Stavanger</div>
+    <h1 class="reveal reveal-delay-1">Extended <em>References</em><br>&amp; Supplementary Materials</h1>
+    <p class="page-header-desc reveal reveal-delay-2">
+      Full bibliographic details and BibTeX entries for the works cited in the application for the PhD
+      fellowship in <strong>Energy Security, Power Grid Resilience, and Intelligent Energy Systems</strong>
+      at UiS (Ref. 299040), supervised by Degefa and Eielsen.
+    </p>
+    <div class="header-meta reveal reveal-delay-3">
+      <span>University of Stavanger · Norway</span>
+      <span>Ref. 299040</span>
+      <span>3 core references</span>
+      <span>May 2026</span>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="content-wrap">
+
+  <!-- Context box -->
+  <div class="info-box reveal">
+    <div class="info-box-label">About this page</div>
+    <p>
+      This page accompanies the formal application letter submitted for the UiS PhD fellowship.
+      It provides <strong>full citation data</strong> and <strong>BibTeX entries</strong> for each referenced work,
+      supplementing the condensed in-text citations in the letter. Click any DOI badge to open
+      the publisher's page, or expand the BibTeX block to copy the citation directly.
+    </p>
+  </div>
+
+  <!-- References heading -->
+  <div class="reveal">
+    <div class="section-label"><span class="num">01 ·</span> Core References</div>
+    <h2 class="section-heading">Academic <em>literature</em> cited</h2>
+    <p class="section-intro">
+      Three peer-reviewed IEEE journal articles form the primary scholarly foundation of the proposed
+      research direction on hierarchical decision frameworks for autonomous islanding and DER coordination.
+    </p>
+  </div>
+
+  <!-- REFERENCE LIST -->
+  <div class="ref-list">
+
+    <!-- Ref 1 -->
+    <div class="ref-item reveal">
+      <div class="ref-num">[1]</div>
+      <div class="ref-body">
+        <div class="ref-title">Metrics and Quantification of Operational and Infrastructure Resilience in Power Systems</div>
+        <div class="ref-authors">
+          M. Panteli, P. Mancarella, D. N. Trakas, E. Kyriakides, and N. D. Hatziargyriou
+        </div>
+        <div class="ref-journal">
+          IEEE Transactions on Power Systems · Vol. 32, No. 6, pp. 4732–4742 · 2017
+        </div>
+        <div class="ref-tags">
+          <span class="ref-tag">Power System Resilience</span>
+          <span class="ref-tag">Infrastructure Metrics</span>
+          <span class="ref-tag">Operational Resilience</span>
+          <span class="ref-tag">Quantification Framework</span>
+          <a href="https://doi.org/10.1109/TPWRS.2017.2664141" target="_blank" rel="noopener" class="ref-doi">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" width="10" height="10">
+              <path d="M7 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1V9"/>
+              <path d="M10 2h4v4M9 7l5-5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            DOI: 10.1109/TPWRS.2017.2664141
+          </a>
+        </div>
+        <div class="bibtex-section">
+          <button class="bibtex-toggle" onclick="toggleBibtex(this)">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" width="10" height="10">
+              <path d="M6 3l5 5-5 5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            BibTeX
+          </button>
+          <div class="bibtex-code">
+<button class="copy-btn" onclick="copyBibtex(this)">Copy</button>@article{panteli2017metrics,
+  author  = {Panteli, Mathaios and Mancarella, Pierluigi and
+             Trakas, Dimitris N. and Kyriakides, Elias and
+             Hatziargyriou, Nikos D.},
+  title   = {Metrics and Quantification of Operational and
+             Infrastructure Resilience in Power Systems},
+  journal = {IEEE Transactions on Power Systems},
+  volume  = {32},
+  number  = {6},
+  pages   = {4732--4742},
+  year    = {2017},
+  doi     = {10.1109/TPWRS.2017.2664141}
+}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ref 2 -->
+    <div class="ref-item reveal reveal-delay-1">
+      <div class="ref-num">[2]</div>
+      <div class="ref-body">
+        <div class="ref-title">Microgrid Stability Definitions, Analysis, and Examples</div>
+        <div class="ref-authors">
+          M. Farrokhabadi, C. A. Cañizares, J. W. Simpson-Porco, E. Nasr, L. Fan, P. A. Mendoza-Araya,
+          R. Tonkoski, U. Tamrakar, N. Hatziargyriou, D. Lagos, R. W. Wies, M. Paolone, M. Liserre,
+          L. Meegahapola, M. Kabalan, A. H. Hajimiragha, D. Peralta, M. A. Elizondo, K. P. Schneider,
+          F. K. Tuffner, and J. Reilly
+        </div>
+        <div class="ref-journal">
+          IEEE Transactions on Power Systems · Vol. 35, No. 1, pp. 13–29 · 2020
+        </div>
+        <div class="ref-tags">
+          <span class="ref-tag">Microgrid Stability</span>
+          <span class="ref-tag">Islanding</span>
+          <span class="ref-tag">DER Coordination</span>
+          <span class="ref-tag">Grid-Forming Control</span>
+          <a href="https://doi.org/10.1109/TPWRS.2019.2925703" target="_blank" rel="noopener" class="ref-doi">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" width="10" height="10">
+              <path d="M7 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1V9"/>
+              <path d="M10 2h4v4M9 7l5-5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            DOI: 10.1109/TPWRS.2019.2925703
+          </a>
+        </div>
+        <div class="bibtex-section">
+          <button class="bibtex-toggle" onclick="toggleBibtex(this)">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" width="10" height="10">
+              <path d="M6 3l5 5-5 5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            BibTeX
+          </button>
+          <div class="bibtex-code">
+<button class="copy-btn" onclick="copyBibtex(this)">Copy</button>@article{farrokhabadi2020microgrid,
+  author  = {Farrokhabadi, Mostafa and Ca{\~{n}}izares, Claudio A. and
+             Simpson-Porco, John W. and Nasr, Ehsan and Fan, Lingling and
+             Mendoza-Araya, Patricio A. and Tonkoski, Reinaldo and
+             Tamrakar, Ujjwol and Hatziargyriou, Nikos and Lagos, Dimitris and
+             Wies, Richard W. and Paolone, Mario and Liserre, Marco and
+             Meegahapola, Lasantha and Kabalan, Mahmoud and
+             Hajimiragha, Amir H. and Peralta, Dario and
+             Elizondo, Marcelo A. and Schneider, Kevin P. and
+             Tuffner, Francis K. and Reilly, Jim},
+  title   = {Microgrid Stability Definitions, Analysis, and Examples},
+  journal = {IEEE Transactions on Power Systems},
+  volume  = {35},
+  number  = {1},
+  pages   = {13--29},
+  year    = {2020},
+  doi     = {10.1109/TPWRS.2019.2925703}
+}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ref 3 -->
+    <div class="ref-item reveal reveal-delay-2">
+      <div class="ref-num">[3]</div>
+      <div class="ref-body">
+        <div class="ref-title">Resiliency-Oriented Microgrid Optimal Scheduling</div>
+        <div class="ref-authors">
+          A. Khodaei
+        </div>
+        <div class="ref-journal">
+          IEEE Transactions on Smart Grid · Vol. 5, No. 4, pp. 1584–1591 · 2014
+        </div>
+        <div class="ref-tags">
+          <span class="ref-tag">Resiliency</span>
+          <span class="ref-tag">Optimal Scheduling</span>
+          <span class="ref-tag">Microgrid Optimisation</span>
+          <span class="ref-tag">Smart Grid</span>
+          <a href="https://doi.org/10.1109/TSG.2014.2311465" target="_blank" rel="noopener" class="ref-doi">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" width="10" height="10">
+              <path d="M7 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1V9"/>
+              <path d="M10 2h4v4M9 7l5-5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            DOI: 10.1109/TSG.2014.2311465
+          </a>
+        </div>
+        <div class="bibtex-section">
+          <button class="bibtex-toggle" onclick="toggleBibtex(this)">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" width="10" height="10">
+              <path d="M6 3l5 5-5 5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            BibTeX
+          </button>
+          <div class="bibtex-code">
+<button class="copy-btn" onclick="copyBibtex(this)">Copy</button>@article{khodaei2014resiliency,
+  author  = {Khodaei, Amin},
+  title   = {Resiliency-Oriented Microgrid Optimal Scheduling},
+  journal = {IEEE Transactions on Smart Grid},
+  volume  = {5},
+  number  = {4},
+  pages   = {1584--1591},
+  year    = {2014},
+  doi     = {10.1109/TSG.2014.2311465}
+}</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /ref-list -->
+
+  <hr class="divider">
+
+  <!-- Supplementary note -->
+  <div class="reveal">
+    <div class="section-label"><span class="num">02 ·</span> Supplementary Note</div>
+    <h2 class="section-heading">Research <em>context</em></h2>
+    <p class="section-intro">
+      The three works above anchor the proposed dissertation's conceptual foundation.
+      Panteli et al. [1] establish the resilience trapezoid metric framework adopted in the performance
+      quantification layer. Farrokhabadi et al. [2] provide the definitional taxonomy of microgrid stability
+      modes — frequency, voltage, and small-signal — directly informing the hierarchical control design.
+      Khodaei [3] demonstrates scenario-based optimal scheduling under uncertainty, the methodological
+      antecedent for the autonomous islanding decision framework proposed in the application.
+    </p>
+  </div>
+
+</main>
+
+<!-- CONTACT STRIP -->
+<section id="contact-strip">
+  <h2 class="reveal">Back to <em>main site.</em></h2>
+  <p class="reveal reveal-delay-1">Explore the full portfolio, timeline, and project work at the homepage.</p>
+  <div class="contact-btns reveal reveal-delay-2">
+    <a href="/" class="btn btn-dark">← ardiancandra.com</a>
+    <a href="mailto:ardian@ardiancandra.com" class="btn btn-outline">Email ↗</a>
+  </div>
+</section>
+
+<footer>
+  <p>Ardian Candra © 2026 — ardiancandra.com/phd-uis · Extended References</p>
+</footer>
+
+<script>
+(function() {
+  'use strict';
+
+  // Nav scroll
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY > 30), { passive: true });
+
+  // Scroll reveal
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+})();
+
+function toggleBibtex(btn) {
+  const code = btn.nextElementSibling;
+  btn.classList.toggle('open');
+  code.classList.toggle('open');
+}
+
+function copyBibtex(btn) {
+  const block = btn.parentElement;
+  // Get text excluding the button itself
+  const text = block.innerText.replace(/^Copy\n/, '').replace(/^Copied!\n/, '');
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>
