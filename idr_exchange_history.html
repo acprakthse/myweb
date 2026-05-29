@@ -18,6 +18,15 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace; min-height: 100vh; }
 
+  .home-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 0.3rem 0.85rem; border-radius: 20px;
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--muted); font-size: 0.67rem; letter-spacing: 0.05em;
+    text-decoration: none; transition: all 0.18s;
+  }
+  .home-btn:hover { border-color: rgba(255,255,255,0.18); color: var(--text); }
+
   .live-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 0.65rem; color: #70c090; letter-spacing: 0.06em; }
   .live-dot { width: 7px; height: 7px; border-radius: 50%; background: #70c090; animation: pulse 1.6s ease-in-out infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
@@ -94,10 +103,40 @@
 
   footer { padding: 1.1rem 3rem; border-top: 1px solid var(--border); font-size: 0.6rem; color: var(--muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
 
+  /* ── Mini-chart grid ──────────────────────────────────────────────── */
+  .mini-charts-section { padding: 0 3rem 1rem; }
+  .mini-charts-header {
+    font-size: 0.62rem; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.1em; margin-bottom: 1rem;
+    padding-top: 1.75rem; border-top: 1px solid var(--border);
+  }
+  .mini-chart-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.85rem;
+  }
+  .mini-chart-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 0.85rem 0.9rem 0.7rem;
+    transition: border-color 0.2s;
+  }
+  .mini-chart-card:hover { border-color: rgba(255,255,255,0.15); }
+  .mini-card-top {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 0.15rem;
+  }
+  .mini-card-ccy { font-size: 0.82rem; font-weight: 500; }
+  .mini-card-live { font-size: 0.7rem; }
+  .mini-card-name { font-size: 0.56rem; color: var(--muted); margin-bottom: 0.55rem; }
+  .mini-card-change { font-size: 0.58rem; margin-bottom: 0.5rem; }
+  .mini-chart-container { position: relative; height: 110px; }
+
+  @media (max-width: 900px) {
+    .mini-chart-grid { grid-template-columns: repeat(2, 1fr); }
+  }
   @media (max-width:700px) {
-    header,.controls,.stat-card,.chart-wrap,.table-section,.info-bar,footer { padding-left:1.25rem; padding-right:1.25rem; }
+    header,.controls,.stat-card,.chart-wrap,.table-section,.mini-charts-section,.info-bar,footer { padding-left:1.25rem; padding-right:1.25rem; }
     .stats-row { grid-template-columns:1fr 1fr; }
     .stat-card { border-right:none; border-bottom:1px solid var(--border); }
+    .mini-chart-grid { grid-template-columns: 1fr 1fr; }
   }
 </style>
 </head>
@@ -117,6 +156,9 @@
     <div>Historical: Bank Indonesia · IMF · X-Rates</div>
     <div>Live spot: <span class="live-badge"><span class="live-dot"></span><span id="source-label">loading…</span></span></div>
     <div>Last fetch: <strong id="fetch-time">—</strong></div>
+    <div style="margin-top:0.6rem">
+      <a href="index.html" class="home-btn">← Home</a>
+    </div>
   </div>
 </header>
 
@@ -145,6 +187,11 @@
   <div class="chart-container">
     <canvas id="mainChart" role="img" aria-label="IDR exchange rate history 2015 to today"></canvas>
   </div>
+</div>
+
+<div class="mini-charts-section" id="mini-charts-section">
+  <div class="mini-charts-header">Per-currency breakdown · annual averages + live spot</div>
+  <div class="mini-chart-grid" id="mini-chart-grid"></div>
 </div>
 
 <div class="table-section">
@@ -372,6 +419,104 @@ function renderTable(sel) {
   document.getElementById('data-table').innerHTML = thead+`<tbody>${rows}</tbody>`;
 }
 
+const miniCharts = {};
+
+function renderMiniCharts() {
+  const grid = document.getElementById('mini-chart-grid');
+  grid.innerHTML = '';
+
+  CCYS.forEach(ccy => {
+    const color = COLORS[ccy];
+    const full  = allData(ccy);
+    const s     = calcStats(ccy);
+
+    // build card
+    const card = document.createElement('div');
+    card.className = 'mini-chart-card';
+    card.id = 'mini-card-' + ccy;
+
+    const vsAvgTxt = s.vsAvg != null
+      ? `<span class="${s.vsAvg>0?'up':'dn'}">${s.vsAvg>0?'▲':'▼'} ${Math.abs(s.vsAvg).toFixed(1)}% vs 2026 avg</span>`
+      : '<span style="color:var(--muted)">—</span>';
+
+    card.innerHTML = `
+      <div class="mini-card-top">
+        <span class="mini-card-ccy" style="color:${color}">${ccy}</span>
+        <span class="mini-card-live" style="color:${color}">${fmt(s.today)}</span>
+      </div>
+      <div class="mini-card-name">${NAMES[ccy]}</div>
+      <div class="mini-card-change">${vsAvgTxt}</div>
+      <div class="mini-chart-container"><canvas id="mc-${ccy}"></canvas></div>`;
+    grid.appendChild(card);
+
+    // datasets: solid history, dashed bridge to live
+    const labels  = [...HIST_LABELS, 'Today ★'];
+    const histSeg = full.map((v,i) => i < TODAY_IDX ? v : null);
+    const liveSeg = full.map((v,i) => i < AVG26_IDX ? null : v);
+
+    const ctx = card.querySelector('#mc-' + ccy).getContext('2d');
+    if (miniCharts[ccy]) miniCharts[ccy].destroy();
+    miniCharts[ccy] = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            data: histSeg,
+            borderColor: color, backgroundColor: color + '18',
+            borderWidth: 2, fill: true, tension: 0.35, spanGaps: false,
+            pointRadius: histSeg.map(v => v != null ? 2 : 0),
+            pointBackgroundColor: color, pointBorderColor: '#161920', pointBorderWidth: 1.5,
+          },
+          {
+            data: liveSeg,
+            borderColor: color, borderDash: [5,4], borderWidth: 1.8,
+            fill: false, tension: 0, spanGaps: false, showLine: true,
+            backgroundColor: 'transparent',
+            pointStyle: liveSeg.map((_,i) => i===TODAY_IDX ? 'rectRot' : 'circle'),
+            pointRadius: liveSeg.map((v,i) => v==null?0 : i===TODAY_IDX?6:2),
+            pointBackgroundColor: liveSeg.map((_,i) => i===TODAY_IDX?'#ffffff':color),
+            pointBorderColor: color, pointBorderWidth: liveSeg.map((_,i)=>i===TODAY_IDX?2:1),
+          }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        animation: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1e2230', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1,
+            titleColor: '#7a7f8e', bodyColor: '#e8e6df',
+            titleFont: { family: 'DM Mono', size: 10 }, bodyFont: { family: 'DM Mono', size: 10 },
+            padding: 8,
+            filter: item => item.parsed.y != null,
+            callbacks: {
+              title: items => items[0].label === 'Today ★' ? `Live · ${liveDate}` : `Year ${items[0].label}`,
+              label: ctx => `  ${fmt(ctx.parsed.y)} IDR`,
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(255,255,255,0.03)' },
+            ticks: { color: '#7a7f8e', font: { family: 'DM Mono', size: 8 }, maxRotation: 45,
+              callback: (v, i) => (i % 3 === 0) ? HIST_LABELS[i] || 'Today' : '' },
+            border: { color: 'rgba(255,255,255,0.07)' }
+          },
+          y: {
+            grid: { color: 'rgba(255,255,255,0.03)' },
+            ticks: { color: '#7a7f8e', font: { family: 'DM Mono', size: 8 },
+              callback: v => v >= 1000 ? (v/1000).toFixed(0)+'k' : v },
+            border: { color: 'rgba(255,255,255,0.07)' }
+          }
+        }
+      }
+    });
+  });
+}
+
 function update(sel) {
   const statCcy = sel==='ALL'?'USD':sel;
   renderStats(statCcy); renderChart(sel); renderLegend(sel); renderTable(sel);
@@ -416,6 +561,7 @@ function update(sel) {
   loader.classList.add('hidden');
   setTimeout(()=>{ loader.style.display='none'; }, 450);
   update('USD');
+  renderMiniCharts();
   document.querySelectorAll('.pill').forEach(p => p.addEventListener('click', ()=>update(p.dataset.ccy)));
 })();
 </script>
