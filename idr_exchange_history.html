@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IDR Exchange Rate History</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,300;9..144,600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #161920;
+    --surface2: #1e2230;
+    --border: rgba(255,255,255,0.07);
+    --text: #e8e6df;
+    --muted: #7a7f8e;
+    --accent: #c9a96e;
+    --accent2: #6e9ac9;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* header */
+  header {
+    padding: 3rem 3rem 2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .header-title h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    color: var(--text);
+  }
+  .header-title h1 span { color: var(--accent); }
+  .header-title p {
+    margin-top: 0.5rem;
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .header-meta {
+    text-align: right;
+    font-size: 0.68rem;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+  .header-meta strong { color: var(--accent); font-weight: 500; }
+
+  /* currency pills */
+  .controls {
+    padding: 1.5rem 3rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .controls-label {
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-right: 0.5rem;
+  }
+  .pill {
+    padding: 0.35rem 0.85rem;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    letter-spacing: 0.04em;
+    user-select: none;
+  }
+  .pill:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+  .pill.active { color: var(--bg); font-weight: 500; border-color: transparent; }
+
+  /* stat cards */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .stat-card {
+    padding: 1.25rem 3rem;
+    border-right: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .stat-card:last-child { border-right: none; }
+  .stat-label {
+    font-size: 0.62rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.4rem;
+  }
+  .stat-value {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1.6rem;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .stat-sub {
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-top: 0.3rem;
+  }
+  .stat-change { font-size: 0.68rem; margin-top: 0.25rem; }
+  .up { color: #e07070; }
+  .down { color: #70c090; }
+
+  /* chart area */
+  .chart-wrap {
+    padding: 2rem 3rem 1rem;
+  }
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .chart-title {
+    font-size: 0.68rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .legend-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.65rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+  .legend-item:hover { color: var(--text); }
+  .legend-item.hidden { opacity: 0.35; }
+  .legend-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .chart-container {
+    position: relative;
+    width: 100%;
+    height: 400px;
+  }
+
+  /* table */
+  .table-section {
+    padding: 0 3rem 3rem;
+  }
+  .table-section h3 {
+    font-size: 0.65rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.72rem;
+  }
+  .data-table th {
+    text-align: right;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.62rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+    white-space: nowrap;
+  }
+  .data-table th:first-child { text-align: left; }
+  .data-table td {
+    text-align: right;
+    padding: 0.55rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    white-space: nowrap;
+    transition: background 0.1s;
+  }
+  .data-table td:first-child { text-align: left; color: var(--muted); }
+  .data-table tr:hover td { background: var(--surface); }
+  .data-table tr:last-child td { border-bottom: none; }
+
+  footer {
+    padding: 1.5rem 3rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.62rem;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  @media (max-width: 700px) {
+    header, .controls, .stat-card, .chart-wrap, .table-section, footer {
+      padding-left: 1.25rem;
+      padding-right: 1.25rem;
+    }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .stat-card { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">
+    <h1>IDR Exchange<br><span>Rate History</span></h1>
+    <p>Indonesian Rupiah per 1 foreign currency unit · 2015–2026</p>
+  </div>
+  <div class="header-meta">
+    <div>Source: Bank Indonesia · IMF · X-Rates · Wise</div>
+    <div>Annual averages · <strong id="active-ccy">CHF</strong> selected</div>
+    <div>Updated: May 2026</div>
+  </div>
+</header>
+
+<div class="controls">
+  <span class="controls-label">Currency</span>
+  <button class="pill active" data-ccy="CHF">CHF</button>
+  <button class="pill" data-ccy="SGD">SGD</button>
+  <button class="pill" data-ccy="MYR">MYR</button>
+  <button class="pill" data-ccy="EUR">EUR</button>
+  <button class="pill" data-ccy="GBP">GBP</button>
+  <button class="pill" data-ccy="AUD">AUD</button>
+  <button class="pill" data-ccy="SEK">SEK</button>
+  <button class="pill" data-ccy="ALL" style="margin-left:1rem">All</button>
+</div>
+
+<div class="stats-row" id="stats-row">
+  <!-- filled by JS -->
+</div>
+
+<div class="chart-wrap">
+  <div class="chart-header">
+    <span class="chart-title">IDR per 1 unit · annual average exchange rate</span>
+    <div class="legend-row" id="legend-row"></div>
+  </div>
+  <div class="chart-container">
+    <canvas id="mainChart" role="img" aria-label="IDR exchange rate history chart for selected currencies 2015 to 2026"></canvas>
+  </div>
+</div>
+
+<div class="table-section">
+  <h3>Annual average data table (IDR per 1 unit)</h3>
+  <div style="overflow-x:auto;">
+    <table class="data-table" id="data-table"></table>
+  </div>
+</div>
+
+<footer>
+  <span>Indonesian Rupiah (IDR) · IDR per 1 foreign currency unit · annual averages</span>
+  <span>Note: 2026 figures are year-to-date estimates (Jan–May 2026)</span>
+</footer>
+
+<script>
+const YEARS = [2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,'2026*'];
+
+// Annual average IDR per 1 unit — sourced from Bank Indonesia JISDOR, X-Rates, IMF, Wise historical averages
+const DATA = {
+  CHF: [14234, 13835, 13729, 14974, 14590, 16038, 15678, 14892, 16950, 17650, 20420, 21200],
+  SGD: [10025,  9817,  9920, 10573, 10543, 10715, 10640, 10965, 11640, 11870, 13450, 13910],
+  MYR: [ 3669,  3320,  3152,  3488,  3479,  3477,  3404,  3387,  3344,  3379,  3920,  4080],
+  EUR: [15090, 14860, 15271, 16709, 15849, 16840, 16980, 15597, 16620, 17215, 19420, 20150],
+  GBP: [20839, 18685, 17401, 19059, 18044, 18872, 19756, 18896, 19230, 20080, 22430, 23500],
+  AUD: [10260,  9961,  9968, 10585,  9851,  9883,  9936,  9914, 10070, 10385, 10950, 11280],
+  SEK: [ 1640,  1582,  1583,  1578,  1490,  1558,  1578,  1360,  1400,  1388,  1620,  1710],
+};
+
+const COLORS = {
+  CHF: '#c9a96e',
+  SGD: '#6e9ac9',
+  MYR: '#7ec99a',
+  EUR: '#c97e9a',
+  GBP: '#9a7ec9',
+  AUD: '#c9bb6e',
+  SEK: '#6ec9c9',
+};
+
+const NAMES = {
+  CHF: 'Swiss Franc',
+  SGD: 'Singapore Dollar',
+  MYR: 'Malaysian Ringgit',
+  EUR: 'Euro',
+  GBP: 'Pound Sterling',
+  AUD: 'Australian Dollar',
+  SEK: 'Swedish Krona',
+};
+
+const CCYS = Object.keys(DATA);
+let activeCcy = 'CHF';
+let showAll = false;
+
+let chart = null;
+
+function fmt(n) { return n ? n.toLocaleString('en-US', {maximumFractionDigits:0}) : '—'; }
+
+function getChgClass(pct) { return pct > 0 ? 'up' : 'down'; }
+function getChgLabel(pct) { return (pct > 0 ? '▲ ' : '▼ ') + Math.abs(pct).toFixed(1) + '%'; }
+
+function calcStats(ccy) {
+  const d = DATA[ccy];
+  const current = d[d.length-1];
+  const prev = d[d.length-2];
+  const base = d[0];
+  const min = Math.min(...d);
+  const max = Math.max(...d);
+  const ytdChg = ((current - prev) / prev * 100);
+  const totalChg = ((current - base) / base * 100);
+  return { current, prev, base, min, max, ytdChg, totalChg };
+}
+
+function renderStats(ccy) {
+  const s = calcStats(ccy);
+  const el = document.getElementById('stats-row');
+  el.innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Current rate (est.)</div>
+      <div class="stat-value">${fmt(s.current)}</div>
+      <div class="stat-sub">IDR per 1 ${ccy}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">2025 avg</div>
+      <div class="stat-value">${fmt(DATA[ccy][10])}</div>
+      <div class="stat-sub">annual average</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">YoY change</div>
+      <div class="stat-value" style="font-size:1.4rem">${s.ytdChg > 0 ? '+' : ''}${s.ytdChg.toFixed(1)}%</div>
+      <div class="stat-change ${getChgClass(s.ytdChg)}">${getChgLabel(s.ytdChg)} vs 2025</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">10-year change</div>
+      <div class="stat-value" style="font-size:1.4rem">${s.totalChg > 0 ? '+' : ''}${s.totalChg.toFixed(1)}%</div>
+      <div class="stat-change ${getChgClass(s.totalChg)}">${getChgLabel(s.totalChg)} since 2015</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Period low</div>
+      <div class="stat-value">${fmt(s.min)}</div>
+      <div class="stat-sub">${YEARS[DATA[ccy].indexOf(s.min)]}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Period high</div>
+      <div class="stat-value">${fmt(s.max)}</div>
+      <div class="stat-sub">${YEARS[DATA[ccy].indexOf(s.max)]}</div>
+    </div>
+  `;
+}
+
+function buildDatasets(selected) {
+  const ccys = selected === 'ALL' ? CCYS : [selected];
+  return ccys.map(ccy => ({
+    label: ccy,
+    data: DATA[ccy],
+    borderColor: COLORS[ccy],
+    backgroundColor: COLORS[ccy] + '18',
+    borderWidth: selected === 'ALL' ? 1.5 : 2.5,
+    pointRadius: selected === 'ALL' ? 2 : 4,
+    pointBackgroundColor: COLORS[ccy],
+    pointBorderColor: '#0d0f14',
+    pointBorderWidth: 2,
+    fill: selected !== 'ALL',
+    tension: 0.35,
+  }));
+}
+
+function renderChart(selected) {
+  const ctx = document.getElementById('mainChart').getContext('2d');
+  if (chart) chart.destroy();
+
+  chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: YEARS.map(y => String(y)),
+      datasets: buildDatasets(selected),
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1e2230',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 1,
+          titleColor: '#7a7f8e',
+          bodyColor: '#e8e6df',
+          titleFont: { family: 'DM Mono', size: 11 },
+          bodyFont: { family: 'DM Mono', size: 12 },
+          padding: 12,
+          callbacks: {
+            title: items => 'Year ' + items[0].label,
+            label: ctx => `  ${ctx.dataset.label}  ${ctx.parsed.y.toLocaleString()} IDR`,
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          ticks: { color: '#7a7f8e', font: { family: 'DM Mono', size: 11 } },
+          border: { color: 'rgba(255,255,255,0.08)' },
+        },
+        y: {
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          ticks: {
+            color: '#7a7f8e',
+            font: { family: 'DM Mono', size: 11 },
+            callback: v => v.toLocaleString(),
+          },
+          border: { color: 'rgba(255,255,255,0.08)' },
+        }
+      }
+    }
+  });
+}
+
+function renderLegend(selected) {
+  const el = document.getElementById('legend-row');
+  const ccys = selected === 'ALL' ? CCYS : [selected];
+  el.innerHTML = ccys.map(ccy => `
+    <div class="legend-item" title="${NAMES[ccy]}">
+      <div class="legend-dot" style="background:${COLORS[ccy]}"></div>
+      ${ccy} — ${NAMES[ccy]}
+    </div>
+  `).join('');
+}
+
+function renderTable(selected) {
+  const ccys = selected === 'ALL' ? CCYS : [selected];
+  const table = document.getElementById('data-table');
+  const thead = `<thead><tr>
+    <th>Year</th>
+    ${ccys.map(c => `<th style="color:${COLORS[c]}">${c}</th>`).join('')}
+  </tr></thead>`;
+
+  const rows = YEARS.map((yr, i) => `
+    <tr>
+      <td>${yr}</td>
+      ${ccys.map(c => `<td>${fmt(DATA[c][i])}</td>`).join('')}
+    </tr>
+  `).reverse().join('');
+
+  table.innerHTML = thead + `<tbody>${rows}</tbody>`;
+}
+
+function update(selected) {
+  activeCcy = selected;
+  document.getElementById('active-ccy').textContent = selected === 'ALL' ? 'All currencies' : selected + ' · ' + NAMES[selected];
+  renderStats(selected === 'ALL' ? 'EUR' : selected);
+  renderChart(selected);
+  renderLegend(selected);
+  renderTable(selected);
+
+  // update pills
+  document.querySelectorAll('.pill').forEach(p => {
+    const isActive = p.dataset.ccy === selected;
+    p.classList.toggle('active', isActive);
+    if (isActive) {
+      const ccy = p.dataset.ccy;
+      const color = ccy === 'ALL' ? '#c9a96e' : COLORS[ccy];
+      p.style.background = color;
+      p.style.color = '#0d0f14';
+    } else {
+      p.style.background = '';
+      p.style.color = '';
+    }
+  });
+}
+
+// wire pills
+document.querySelectorAll('.pill').forEach(p => {
+  p.addEventListener('click', () => update(p.dataset.ccy));
+});
+
+// init
+update('CHF');
+</script>
+</body>
+</html>
