@@ -4,234 +4,124 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IDR Exchange Rate History</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,300;9..144,600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   :root {
     --bg: #0d0f14;
     --surface: #161920;
-    --surface2: #1e2230;
     --border: rgba(255,255,255,0.07);
     --text: #e8e6df;
     --muted: #7a7f8e;
     --accent: #c9a96e;
-    --accent2: #6e9ac9;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    min-height: 100vh;
-    padding: 0;
-  }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Mono', monospace; min-height: 100vh; }
 
-  /* header */
+  /* ── live badge ── */
+  .live-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.65rem; color: #70c090; letter-spacing: 0.06em;
+  }
+  .live-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: #70c090;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .loading-overlay {
+    position: fixed; inset: 0; background: var(--bg);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 1rem; z-index: 99; transition: opacity 0.4s ease;
+  }
+  .loading-overlay.hidden { opacity: 0; pointer-events: none; }
+  .spinner {
+    width: 36px; height: 36px; border: 2px solid var(--border);
+    border-top-color: var(--accent); border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.08em; }
+
   header {
-    padding: 3rem 3rem 2rem;
+    padding: 2.5rem 3rem 1.75rem;
     border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 1rem;
+    display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
   }
   .header-title h1 {
-    font-family: 'Fraunces', serif;
-    font-weight: 600;
-    font-size: clamp(1.8rem, 4vw, 3rem);
-    letter-spacing: -0.02em;
-    line-height: 1;
-    color: var(--text);
+    font-family: 'Fraunces', serif; font-weight: 600;
+    font-size: clamp(1.8rem, 4vw, 2.8rem); letter-spacing: -0.02em; line-height: 1;
   }
   .header-title h1 span { color: var(--accent); }
-  .header-title p {
-    margin-top: 0.5rem;
-    font-size: 0.72rem;
-    color: var(--muted);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-  .header-meta {
-    text-align: right;
-    font-size: 0.68rem;
-    color: var(--muted);
-    line-height: 1.8;
-  }
+  .header-title p { margin-top: 0.5rem; font-size: 0.7rem; color: var(--muted); letter-spacing: 0.07em; text-transform: uppercase; }
+  .header-meta { text-align: right; font-size: 0.67rem; color: var(--muted); line-height: 2; }
   .header-meta strong { color: var(--accent); font-weight: 500; }
 
-  /* currency pills */
   .controls {
-    padding: 1.5rem 3rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    align-items: center;
+    padding: 1.1rem 3rem; display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: center;
     border-bottom: 1px solid var(--border);
   }
-  .controls-label {
-    font-size: 0.65rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-right: 0.5rem;
-  }
+  .controls-label { font-size: 0.63rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-right: 0.4rem; }
   .pill {
-    padding: 0.35rem 0.85rem;
-    border-radius: 20px;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.72rem;
-    cursor: pointer;
-    transition: all 0.18s ease;
-    letter-spacing: 0.04em;
-    user-select: none;
+    padding: 0.32rem 0.8rem; border-radius: 20px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--muted); font-family: 'DM Mono', monospace;
+    font-size: 0.7rem; cursor: pointer; transition: all 0.15s; letter-spacing: 0.04em; user-select: none;
   }
-  .pill:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
-  .pill.active { color: var(--bg); font-weight: 500; border-color: transparent; }
+  .pill:hover { border-color: rgba(255,255,255,0.18); color: var(--text); }
+  .pill.active { color: #0d0f14; font-weight: 500; border-color: transparent; }
+  .pill-sep { width: 1px; height: 22px; background: var(--border); margin: 0 0.2rem; }
 
-  /* stat cards */
-  .stats-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .stat-card {
-    padding: 1.25rem 3rem;
-    border-right: 1px solid var(--border);
-    transition: background 0.15s;
-  }
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); border-bottom: 1px solid var(--border); }
+  .stat-card { padding: 1.1rem 2rem; border-right: 1px solid var(--border); }
   .stat-card:last-child { border-right: none; }
-  .stat-label {
-    font-size: 0.62rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 0.4rem;
-  }
-  .stat-value {
-    font-family: 'Fraunces', serif;
-    font-weight: 600;
-    font-size: 1.6rem;
-    color: var(--text);
-    letter-spacing: -0.02em;
-    line-height: 1;
-  }
-  .stat-sub {
-    font-size: 0.65rem;
-    color: var(--muted);
-    margin-top: 0.3rem;
-  }
-  .stat-change { font-size: 0.68rem; margin-top: 0.25rem; }
+  .stat-label { font-size: 0.6rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.3rem; }
+  .stat-value { font-family: 'Fraunces', serif; font-weight: 600; font-size: 1.45rem; letter-spacing: -0.02em; line-height: 1; }
+  .stat-sub { font-size: 0.62rem; color: var(--muted); margin-top: 0.22rem; }
+  .stat-change { font-size: 0.64rem; margin-top: 0.18rem; }
   .up { color: #e07070; }
-  .down { color: #70c090; }
+  .dn { color: #70c090; }
 
-  /* chart area */
-  .chart-wrap {
-    padding: 2rem 3rem 1rem;
-  }
-  .chart-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-  .chart-title {
-    font-size: 0.68rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-  .legend-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.65rem;
-    color: var(--muted);
-    cursor: pointer;
-    transition: color 0.15s;
-  }
-  .legend-item:hover { color: var(--text); }
-  .legend-item.hidden { opacity: 0.35; }
-  .legend-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .chart-container {
-    position: relative;
-    width: 100%;
-    height: 400px;
-  }
+  .chart-wrap { padding: 1.75rem 3rem 0.75rem; }
+  .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.1rem; flex-wrap: wrap; gap: 0.75rem; }
+  .chart-title { font-size: 0.63rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+  .legend-row { display: flex; flex-wrap: wrap; gap: 0.9rem; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.63rem; color: var(--muted); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .legend-diamond { width: 8px; height: 8px; transform: rotate(45deg); flex-shrink: 0; border: 1.5px solid #888; background: #fff; }
+  .chart-container { position: relative; width: 100%; height: 400px; }
 
-  /* table */
-  .table-section {
-    padding: 0 3rem 3rem;
-  }
+  .table-section { padding: 0 3rem 3rem; }
   .table-section h3 {
-    font-size: 0.65rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 1rem;
-    padding-top: 2rem;
-    border-top: 1px solid var(--border);
+    font-size: 0.62rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em;
+    margin-bottom: 0.9rem; padding-top: 1.75rem; border-top: 1px solid var(--border);
   }
-  .data-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.72rem;
-  }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 0.7rem; }
   .data-table th {
-    text-align: right;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.62rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    border-bottom: 1px solid var(--border);
-    font-weight: 400;
-    white-space: nowrap;
+    text-align: right; padding: 0.42rem 0.65rem; font-size: 0.59rem; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--border); font-weight: 400; white-space: nowrap;
   }
   .data-table th:first-child { text-align: left; }
-  .data-table td {
-    text-align: right;
-    padding: 0.55rem 0.75rem;
-    border-bottom: 1px solid var(--border);
-    color: var(--text);
-    white-space: nowrap;
-    transition: background 0.1s;
-  }
+  .data-table td { text-align: right; padding: 0.48rem 0.65rem; border-bottom: 1px solid var(--border); white-space: nowrap; }
   .data-table td:first-child { text-align: left; color: var(--muted); }
   .data-table tr:hover td { background: var(--surface); }
   .data-table tr:last-child td { border-bottom: none; }
+  .today-row td { color: var(--accent) !important; font-weight: 500; }
+
+  .error-bar {
+    margin: 1rem 3rem; padding: 0.75rem 1.25rem;
+    border: 1px solid rgba(224,112,112,0.3); border-radius: 6px;
+    background: rgba(224,112,112,0.07); font-size: 0.7rem; color: #e07070;
+    display: none;
+  }
 
   footer {
-    padding: 1.5rem 3rem;
-    border-top: 1px solid var(--border);
-    font-size: 0.62rem;
-    color: var(--muted);
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.5rem;
+    padding: 1.1rem 3rem; border-top: 1px solid var(--border);
+    font-size: 0.6rem; color: var(--muted);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;
   }
 
   @media (max-width: 700px) {
-    header, .controls, .stat-card, .chart-wrap, .table-section, footer {
-      padding-left: 1.25rem;
-      padding-right: 1.25rem;
-    }
+    header,.controls,.stat-card,.chart-wrap,.table-section,.error-bar,footer { padding-left:1.25rem; padding-right:1.25rem; }
     .stats-row { grid-template-columns: 1fr 1fr; }
     .stat-card { border-right: none; border-bottom: 1px solid var(--border); }
   }
@@ -239,278 +129,339 @@
 </head>
 <body>
 
+<!-- loading overlay -->
+<div class="loading-overlay" id="loader">
+  <div class="spinner"></div>
+  <div class="loading-text">Fetching live rates from Frankfurter API…</div>
+</div>
+
 <header>
   <div class="header-title">
     <h1>IDR Exchange<br><span>Rate History</span></h1>
-    <p>Indonesian Rupiah per 1 foreign currency unit · 2015–2026</p>
+    <p>Indonesian Rupiah per 1 foreign currency · 2015–today</p>
   </div>
   <div class="header-meta">
-    <div>Source: Bank Indonesia · IMF · X-Rates · Wise</div>
-    <div>Annual averages · <strong id="active-ccy">CHF</strong> selected</div>
-    <div>Updated: May 2026</div>
+    <div>Historical: Bank Indonesia · IMF · X-Rates</div>
+    <div>Live spot: <span class="live-badge"><span class="live-dot"></span>Frankfurter API (ECB)</span></div>
+    <div>Last fetch: <strong id="fetch-time">—</strong></div>
   </div>
 </header>
 
 <div class="controls">
   <span class="controls-label">Currency</span>
-  <button class="pill active" data-ccy="CHF">CHF</button>
+  <button class="pill active" data-ccy="USD">USD</button>
+  <button class="pill" data-ccy="CHF">CHF</button>
   <button class="pill" data-ccy="SGD">SGD</button>
   <button class="pill" data-ccy="MYR">MYR</button>
   <button class="pill" data-ccy="EUR">EUR</button>
   <button class="pill" data-ccy="GBP">GBP</button>
   <button class="pill" data-ccy="AUD">AUD</button>
   <button class="pill" data-ccy="SEK">SEK</button>
-  <button class="pill" data-ccy="ALL" style="margin-left:1rem">All</button>
+  <div class="pill-sep"></div>
+  <button class="pill" data-ccy="ALL">All</button>
 </div>
 
-<div class="stats-row" id="stats-row">
-  <!-- filled by JS -->
-</div>
+<div class="stats-row" id="stats-row"></div>
+<div class="error-bar" id="error-bar"></div>
 
 <div class="chart-wrap">
   <div class="chart-header">
-    <span class="chart-title">IDR per 1 unit · annual average exchange rate</span>
+    <span class="chart-title">IDR per 1 unit · annual avg + live spot</span>
     <div class="legend-row" id="legend-row"></div>
   </div>
   <div class="chart-container">
-    <canvas id="mainChart" role="img" aria-label="IDR exchange rate history chart for selected currencies 2015 to 2026"></canvas>
+    <canvas id="mainChart" role="img" aria-label="IDR exchange rate history 2015 to today"></canvas>
   </div>
 </div>
 
 <div class="table-section">
-  <h3>Annual average data table (IDR per 1 unit)</h3>
+  <h3>Data table — IDR per 1 unit &nbsp;·&nbsp; annual averages &nbsp;·&nbsp; ★ = live spot today</h3>
   <div style="overflow-x:auto;">
     <table class="data-table" id="data-table"></table>
   </div>
 </div>
 
 <footer>
-  <span>Indonesian Rupiah (IDR) · IDR per 1 foreign currency unit · annual averages</span>
-  <span>Note: 2026 figures are year-to-date estimates (Jan–May 2026)</span>
+  <span>Annual averages: estimated from Bank Indonesia JISDOR, IMF, X-Rates &nbsp;·&nbsp; * 2026 avg = Jan–May YTD estimate</span>
+  <span>Live spot: Frankfurter API (ECB mid-market) — refreshes on every page load</span>
 </footer>
 
 <script>
-const YEARS = [2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,'2026*'];
-
-// Annual average IDR per 1 unit — sourced from Bank Indonesia JISDOR, X-Rates, IMF, Wise historical averages
-const DATA = {
+// ── Static historical data (IDR per 1 unit) ──────────────────────────────────
+// Years 2015–2025 = annual averages; 2026* = Jan–May YTD estimate
+// Index:          0      1      2      3      4      5      6      7      8      9     10     11
+const HIST_LABELS = ['2015','2016','2017','2018','2019','2020','2021','2022','2023','2024','2025','2026*'];
+const HIST = {
+  USD: [13389, 13308, 13381, 14237, 14145, 14583, 14308, 14849, 15237, 15866, 16500, 17200],
   CHF: [14234, 13835, 13729, 14974, 14590, 16038, 15678, 14892, 16950, 17650, 20420, 21200],
-  SGD: [10025,  9817,  9920, 10573, 10543, 10715, 10640, 10965, 11640, 11870, 13450, 13910],
-  MYR: [ 3669,  3320,  3152,  3488,  3479,  3477,  3404,  3387,  3344,  3379,  3920,  4080],
-  EUR: [15090, 14860, 15271, 16709, 15849, 16840, 16980, 15597, 16620, 17215, 19420, 20150],
-  GBP: [20839, 18685, 17401, 19059, 18044, 18872, 19756, 18896, 19230, 20080, 22430, 23500],
+  SGD: [10025,  9817,  9920, 10573, 10543, 10715, 10640, 10965, 11640, 11870, 13450, 13710],
+  MYR: [ 3669,  3320,  3152,  3488,  3479,  3477,  3404,  3387,  3344,  3379,  3920,  4060],
+  EUR: [15090, 14860, 15271, 16709, 15849, 16840, 16980, 15597, 16620, 17215, 19420, 20050],
+  GBP: [20839, 18685, 17401, 19059, 18044, 18872, 19756, 18896, 19230, 20080, 22430, 23300],
   AUD: [10260,  9961,  9968, 10585,  9851,  9883,  9936,  9914, 10070, 10385, 10950, 11280],
-  SEK: [ 1640,  1582,  1583,  1578,  1490,  1558,  1578,  1360,  1400,  1388,  1620,  1710],
+  SEK: [ 1640,  1582,  1583,  1578,  1490,  1558,  1578,  1360,  1400,  1388,  1620,  1700],
 };
 
 const COLORS = {
-  CHF: '#c9a96e',
-  SGD: '#6e9ac9',
-  MYR: '#7ec99a',
-  EUR: '#c97e9a',
-  GBP: '#9a7ec9',
-  AUD: '#c9bb6e',
-  SEK: '#6ec9c9',
+  USD:'#e8a857', CHF:'#c9a96e', SGD:'#6e9ac9',
+  MYR:'#7ec99a', EUR:'#c97e9a', GBP:'#9a7ec9',
+  AUD:'#c9bb6e', SEK:'#6ec9c9',
 };
-
 const NAMES = {
-  CHF: 'Swiss Franc',
-  SGD: 'Singapore Dollar',
-  MYR: 'Malaysian Ringgit',
-  EUR: 'Euro',
-  GBP: 'Pound Sterling',
-  AUD: 'Australian Dollar',
-  SEK: 'Swedish Krona',
+  USD:'US Dollar', CHF:'Swiss Franc', SGD:'Singapore Dollar',
+  MYR:'Malaysian Ringgit', EUR:'Euro', GBP:'Pound Sterling',
+  AUD:'Australian Dollar', SEK:'Swedish Krona',
 };
+const CCYS = Object.keys(HIST);
 
-const CCYS = Object.keys(DATA);
-let activeCcy = 'CHF';
-let showAll = false;
-
+// Live spot — filled after API fetch
+let LIVE = {};   // { USD: 17790, CHF: 22500, ... }
+let liveDate = '';
 let chart = null;
+let currentSel = 'USD';
 
-function fmt(n) { return n ? n.toLocaleString('en-US', {maximumFractionDigits:0}) : '—'; }
+// ── Fetch live rates from Frankfurter ────────────────────────────────────────
+// Frankfurter base is EUR; we get IDR per EUR, then cross-calculate via USD/EUR
+// Endpoint: https://api.frankfurter.app/latest?base=IDR&symbols=USD,CHF,SGD,MYR,EUR,GBP,AUD,SEK
+// This returns how many IDR per 1 of each currency (inverted) — we invert back
+async function fetchLiveRates() {
+  // Ask: 1 IDR = how much of each currency → then invert to get IDR per 1 unit
+  const url = 'https://api.frankfurter.app/latest?base=IDR&symbols=USD,CHF,SGD,MYR,EUR,GBP,AUD,SEK';
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const json = await res.json();
+  // json.rates = { USD: 0.0000578, CHF: 0.0000462, ... } (1 IDR = X ccy)
+  // invert: 1 ccy = 1/X IDR
+  const rates = {};
+  for (const [ccy, val] of Object.entries(json.rates)) {
+    rates[ccy] = Math.round(1 / val);
+  }
+  liveDate = json.date; // e.g. "2026-05-29"
+  return rates;
+}
 
-function getChgClass(pct) { return pct > 0 ? 'up' : 'down'; }
-function getChgLabel(pct) { return (pct > 0 ? '▲ ' : '▼ ') + Math.abs(pct).toFixed(1) + '%'; }
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function fmt(n) { return n != null ? Math.round(n).toLocaleString('en-US') : '—'; }
+
+function allLabels() { return [...HIST_LABELS, `Today ★\n${liveDate}`]; }
+
+function allData(ccy) { return [...HIST[ccy], LIVE[ccy] ?? null]; }
+
+const TODAY_IDX = HIST_LABELS.length; // index 12
+const AVG26_IDX = HIST_LABELS.length - 1; // index 11
 
 function calcStats(ccy) {
-  const d = DATA[ccy];
-  const current = d[d.length-1];
-  const prev = d[d.length-2];
-  const base = d[0];
-  const min = Math.min(...d);
-  const max = Math.max(...d);
-  const ytdChg = ((current - prev) / prev * 100);
-  const totalChg = ((current - base) / base * 100);
-  return { current, prev, base, min, max, ytdChg, totalChg };
+  const d = allData(ccy);
+  const today = d[TODAY_IDX];
+  const avg26 = d[AVG26_IDX];
+  const y2025 = d[10];
+  const base   = d[0];
+  const hist   = d.slice(0, TODAY_IDX);
+  const min = Math.min(...hist.filter(Boolean));
+  const max = Math.max(...hist.filter(Boolean));
+  const minYr = HIST_LABELS[hist.indexOf(min)];
+  const maxYr = HIST_LABELS[hist.indexOf(max)];
+  const vsAvg  = today ? ((today - avg26) / avg26 * 100) : null;
+  const vs2025 = today ? ((today - y2025) / y2025 * 100) : null;
+  const total  = today ? ((today - base)  / base  * 100) : null;
+  return { today, avg26, y2025, base, min, max, minYr, maxYr, vsAvg, vs2025, total };
 }
 
+function chgHtml(pct, label) {
+  if (pct == null) return '<span style="color:var(--muted)">—</span>';
+  const cls = pct > 0 ? 'up' : 'dn';
+  const arr = pct > 0 ? '▲' : '▼';
+  return `<span class="${cls}">${arr} ${Math.abs(pct).toFixed(1)}% ${label}</span>`;
+}
+
+// ── Render stats cards ────────────────────────────────────────────────────────
 function renderStats(ccy) {
   const s = calcStats(ccy);
-  const el = document.getElementById('stats-row');
-  el.innerHTML = `
+  document.getElementById('stats-row').innerHTML = `
     <div class="stat-card">
-      <div class="stat-label">Current rate (est.)</div>
-      <div class="stat-value">${fmt(s.current)}</div>
-      <div class="stat-sub">IDR per 1 ${ccy}</div>
+      <div class="stat-label">Live spot ★</div>
+      <div class="stat-value" style="color:${COLORS[ccy]}">${fmt(s.today)}</div>
+      <div class="stat-sub">IDR per 1 ${ccy} · ECB mid</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">2025 avg</div>
-      <div class="stat-value">${fmt(DATA[ccy][10])}</div>
-      <div class="stat-sub">annual average</div>
+      <div class="stat-label">2026 avg YTD*</div>
+      <div class="stat-value">${fmt(s.avg26)}</div>
+      <div class="stat-sub">Jan–May est.</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">YoY change</div>
-      <div class="stat-value" style="font-size:1.4rem">${s.ytdChg > 0 ? '+' : ''}${s.ytdChg.toFixed(1)}%</div>
-      <div class="stat-change ${getChgClass(s.ytdChg)}">${getChgLabel(s.ytdChg)} vs 2025</div>
+      <div class="stat-label">Spot vs 2026 avg</div>
+      <div class="stat-value" style="font-size:1.25rem">${s.vsAvg != null ? (s.vsAvg > 0 ? '+' : '') + s.vsAvg.toFixed(1) + '%' : '—'}</div>
+      <div class="stat-change">${chgHtml(s.vsAvg, 'vs avg')}</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">10-year change</div>
-      <div class="stat-value" style="font-size:1.4rem">${s.totalChg > 0 ? '+' : ''}${s.totalChg.toFixed(1)}%</div>
-      <div class="stat-change ${getChgClass(s.totalChg)}">${getChgLabel(s.totalChg)} since 2015</div>
+      <div class="stat-label">Spot vs 2025</div>
+      <div class="stat-value" style="font-size:1.25rem">${s.vs2025 != null ? (s.vs2025 > 0 ? '+' : '') + s.vs2025.toFixed(1) + '%' : '—'}</div>
+      <div class="stat-change">${chgHtml(s.vs2025, 'YoY')}</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Period low</div>
-      <div class="stat-value">${fmt(s.min)}</div>
-      <div class="stat-sub">${YEARS[DATA[ccy].indexOf(s.min)]}</div>
+      <div class="stat-label">10-yr change</div>
+      <div class="stat-value" style="font-size:1.25rem">${s.total != null ? (s.total > 0 ? '+' : '') + s.total.toFixed(1) + '%' : '—'}</div>
+      <div class="stat-change">${chgHtml(s.total, 'since 2015')}</div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">Period high</div>
-      <div class="stat-value">${fmt(s.max)}</div>
-      <div class="stat-sub">${YEARS[DATA[ccy].indexOf(s.max)]}</div>
-    </div>
-  `;
+      <div class="stat-label">Hist. range (avg)</div>
+      <div class="stat-value" style="font-size:1.05rem">${fmt(s.min)} – ${fmt(s.max)}</div>
+      <div class="stat-sub">${s.minYr} low · ${s.maxYr} high</div>
+    </div>`;
 }
 
-function buildDatasets(selected) {
-  const ccys = selected === 'ALL' ? CCYS : [selected];
-  return ccys.map(ccy => ({
-    label: ccy,
-    data: DATA[ccy],
-    borderColor: COLORS[ccy],
-    backgroundColor: COLORS[ccy] + '18',
-    borderWidth: selected === 'ALL' ? 1.5 : 2.5,
-    pointRadius: selected === 'ALL' ? 2 : 4,
-    pointBackgroundColor: COLORS[ccy],
-    pointBorderColor: '#0d0f14',
-    pointBorderWidth: 2,
-    fill: selected !== 'ALL',
-    tension: 0.35,
-  }));
+// ── Build Chart.js datasets ──────────────────────────────────────────────────
+function buildDatasets(sel) {
+  const ccys = sel === 'ALL' ? CCYS : [sel];
+  const isAll = sel === 'ALL';
+  return ccys.flatMap(ccy => {
+    const color = COLORS[ccy];
+    const full  = allData(ccy);
+    // historical segment (indices 0..11, null at 12)
+    const histSeg = full.map((v,i) => i < TODAY_IDX ? v : null);
+    // bridge + today segment (null at 0..10, then 2026avg + today)
+    const todaySeg = full.map((v,i) => i < AVG26_IDX ? null : v);
+    return [
+      {
+        label: ccy,
+        data: histSeg,
+        borderColor: color,
+        backgroundColor: color + (isAll ? '00' : '12'),
+        borderWidth: isAll ? 1.5 : 2.5,
+        pointRadius: histSeg.map((v,i) => v != null ? (isAll ? 2 : 4) : 0),
+        pointBackgroundColor: color, pointBorderColor: '#0d0f14', pointBorderWidth: 2,
+        fill: !isAll, tension: 0.35, spanGaps: false,
+      },
+      {
+        label: ccy + '_live',
+        data: todaySeg,
+        borderColor: color,
+        borderDash: [5, 4],
+        borderWidth: isAll ? 1.2 : 2,
+        pointStyle: todaySeg.map((v,i) => i === TODAY_IDX ? 'rectRot' : 'circle'),
+        pointRadius: todaySeg.map((v,i) => {
+          if (v == null) return 0;
+          return i === TODAY_IDX ? (isAll ? 5 : 8) : (isAll ? 2 : 4);
+        }),
+        pointBackgroundColor: todaySeg.map((v,i) => i === TODAY_IDX ? '#ffffff' : color),
+        pointBorderColor: color,
+        pointBorderWidth: todaySeg.map((v,i) => i === TODAY_IDX ? 2 : 1),
+        fill: false, tension: 0, spanGaps: false, showLine: true,
+        backgroundColor: 'transparent',
+      }
+    ];
+  });
 }
 
-function renderChart(selected) {
+function renderChart(sel) {
   const ctx = document.getElementById('mainChart').getContext('2d');
   if (chart) chart.destroy();
-
+  const labels = [...HIST_LABELS, `Today ★`];
   chart = new Chart(ctx, {
     type: 'line',
-    data: {
-      labels: YEARS.map(y => String(y)),
-      datasets: buildDatasets(selected),
-    },
+    data: { labels, datasets: buildDatasets(sel) },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { display: false },
         tooltip: {
-          backgroundColor: '#1e2230',
-          borderColor: 'rgba(255,255,255,0.1)',
-          borderWidth: 1,
-          titleColor: '#7a7f8e',
-          bodyColor: '#e8e6df',
-          titleFont: { family: 'DM Mono', size: 11 },
-          bodyFont: { family: 'DM Mono', size: 12 },
+          backgroundColor: '#1e2230', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1,
+          titleColor: '#7a7f8e', bodyColor: '#e8e6df',
+          titleFont: { family: 'DM Mono', size: 11 }, bodyFont: { family: 'DM Mono', size: 11 },
           padding: 12,
+          filter: item => item.parsed.y != null && !item.dataset.label.endsWith('_live'),
           callbacks: {
-            title: items => 'Year ' + items[0].label,
+            title: items => {
+              const lbl = items[0].label;
+              return lbl === 'Today ★' ? `Live spot · ${liveDate} (ECB)` : `Year ${lbl}`;
+            },
             label: ctx => `  ${ctx.dataset.label}  ${ctx.parsed.y.toLocaleString()} IDR`,
           }
         }
       },
       scales: {
         x: {
-          grid: { color: 'rgba(255,255,255,0.05)' },
-          ticks: { color: '#7a7f8e', font: { family: 'DM Mono', size: 11 } },
-          border: { color: 'rgba(255,255,255,0.08)' },
+          grid: { color: 'rgba(255,255,255,0.045)' },
+          ticks: { color: '#7a7f8e', font: { family: 'DM Mono', size: 10 }, maxRotation: 45 },
+          border: { color: 'rgba(255,255,255,0.07)' },
         },
         y: {
-          grid: { color: 'rgba(255,255,255,0.05)' },
-          ticks: {
-            color: '#7a7f8e',
-            font: { family: 'DM Mono', size: 11 },
-            callback: v => v.toLocaleString(),
-          },
-          border: { color: 'rgba(255,255,255,0.08)' },
+          grid: { color: 'rgba(255,255,255,0.045)' },
+          ticks: { color: '#7a7f8e', font: { family: 'DM Mono', size: 10 }, callback: v => v.toLocaleString() },
+          border: { color: 'rgba(255,255,255,0.07)' },
         }
       }
     }
   });
 }
 
-function renderLegend(selected) {
-  const el = document.getElementById('legend-row');
-  const ccys = selected === 'ALL' ? CCYS : [selected];
-  el.innerHTML = ccys.map(ccy => `
-    <div class="legend-item" title="${NAMES[ccy]}">
-      <div class="legend-dot" style="background:${COLORS[ccy]}"></div>
-      ${ccy} — ${NAMES[ccy]}
-    </div>
-  `).join('');
+function renderLegend(sel) {
+  const ccys = sel === 'ALL' ? CCYS : [sel];
+  document.getElementById('legend-row').innerHTML =
+    ccys.map(ccy => `<div class="legend-item">
+      <div class="legend-dot" style="background:${COLORS[ccy]}"></div>${ccy} — ${NAMES[ccy]}
+    </div>`).join('') +
+    `<div class="legend-item">
+      <div class="legend-diamond"></div>★ live spot
+    </div>`;
 }
 
-function renderTable(selected) {
-  const ccys = selected === 'ALL' ? CCYS : [selected];
-  const table = document.getElementById('data-table');
-  const thead = `<thead><tr>
-    <th>Year</th>
-    ${ccys.map(c => `<th style="color:${COLORS[c]}">${c}</th>`).join('')}
-  </tr></thead>`;
-
-  const rows = YEARS.map((yr, i) => `
-    <tr>
-      <td>${yr}</td>
-      ${ccys.map(c => `<td>${fmt(DATA[c][i])}</td>`).join('')}
-    </tr>
-  `).reverse().join('');
-
-  table.innerHTML = thead + `<tbody>${rows}</tbody>`;
+function renderTable(sel) {
+  const ccys = sel === 'ALL' ? CCYS : [sel];
+  const allL = [...HIST_LABELS, 'Today ★'];
+  const thead = `<thead><tr><th>Year / date</th>${ccys.map(c=>`<th style="color:${COLORS[c]}">${c}</th>`).join('')}</tr></thead>`;
+  const rows = allL.map((yr,i) => {
+    const isToday = i === TODAY_IDX;
+    const label = isToday ? `★ ${liveDate}` : yr;
+    return `<tr class="${isToday ? 'today-row' : ''}">
+      <td>${label}</td>
+      ${ccys.map(c => `<td>${fmt(allData(c)[i])}</td>`).join('')}
+    </tr>`;
+  }).reverse().join('');
+  document.getElementById('data-table').innerHTML = thead + `<tbody>${rows}</tbody>`;
 }
 
-function update(selected) {
-  activeCcy = selected;
-  document.getElementById('active-ccy').textContent = selected === 'ALL' ? 'All currencies' : selected + ' · ' + NAMES[selected];
-  renderStats(selected === 'ALL' ? 'EUR' : selected);
-  renderChart(selected);
-  renderLegend(selected);
-  renderTable(selected);
-
-  // update pills
+function update(sel) {
+  currentSel = sel;
+  const statCcy = sel === 'ALL' ? 'USD' : sel;
+  renderStats(statCcy);
+  renderChart(sel);
+  renderLegend(sel);
+  renderTable(sel);
   document.querySelectorAll('.pill').forEach(p => {
-    const isActive = p.dataset.ccy === selected;
-    p.classList.toggle('active', isActive);
-    if (isActive) {
-      const ccy = p.dataset.ccy;
-      const color = ccy === 'ALL' ? '#c9a96e' : COLORS[ccy];
-      p.style.background = color;
-      p.style.color = '#0d0f14';
-    } else {
-      p.style.background = '';
-      p.style.color = '';
-    }
+    const active = p.dataset.ccy === sel;
+    p.classList.toggle('active', active);
+    const c = p.dataset.ccy;
+    const col = c === 'ALL' ? '#c9a96e' : (COLORS[c] || '#c9a96e');
+    p.style.background = active ? col : '';
+    p.style.color = active ? '#0d0f14' : '';
   });
 }
 
-// wire pills
-document.querySelectorAll('.pill').forEach(p => {
-  p.addEventListener('click', () => update(p.dataset.ccy));
-});
+// ── Boot ─────────────────────────────────────────────────────────────────────
+(async () => {
+  const loader = document.getElementById('loader');
+  const errBar = document.getElementById('error-bar');
+  try {
+    LIVE = await fetchLiveRates();
+    const now = new Date();
+    document.getElementById('fetch-time').textContent =
+      liveDate + ' · ' + now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  } catch (e) {
+    errBar.style.display = 'block';
+    errBar.textContent = `⚠ Could not fetch live rates (${e.message}). Showing historical data only — today's spot column will be empty. Check your internet connection and reload.`;
+  }
+  // hide loader, render
+  loader.classList.add('hidden');
+  setTimeout(() => { loader.style.display = 'none'; }, 450);
+  update('USD');
 
-// init
-update('CHF');
+  // wire pills
+  document.querySelectorAll('.pill').forEach(p =>
+    p.addEventListener('click', () => update(p.dataset.ccy))
+  );
+})();
 </script>
 </body>
 </html>
