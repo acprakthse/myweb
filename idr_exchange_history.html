@@ -235,7 +235,7 @@ let chart = null;
 
 async function tryOpenER() {
   // open.er-api.com — no key, permissive CORS, base=IDR
-  const r = await fetch('https://open.er-api.com/v6/latest/IDR', { mode: 'cors' });
+  const r = await fetch('https://open.er-api.com/v6/latest/IDR', { mode: 'cors', cache: 'no-store' });
   if (!r.ok) throw new Error('open.er-api HTTP ' + r.status);
   const j = await r.json();
   if (j.result !== 'success') throw new Error('open.er-api: ' + j['error-type']);
@@ -249,7 +249,7 @@ async function tryOpenER() {
 async function tryFrankfurterProxy() {
   // Frankfurter via corsproxy.io — fallback
   const target = encodeURIComponent('https://api.frankfurter.app/latest?base=IDR&symbols=USD,CHF,SGD,MYR,EUR,GBP,AUD,SEK');
-  const r = await fetch('https://corsproxy.io/?' + target, { mode: 'cors' });
+  const r = await fetch('https://corsproxy.io/?' + target, { mode: 'cors', cache: 'no-store' });
   if (!r.ok) throw new Error('proxy HTTP ' + r.status);
   const j = await r.json();
   const out = {};
