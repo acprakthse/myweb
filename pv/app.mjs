@@ -8,7 +8,17 @@ function read(){const d=Object.fromEntries(new FormData(form));numNames.forEach(
 function status(message,error=false){$('status').textContent=message;$('status').classList.toggle('error',error);}
 function invalidate(){result=null;$('result-content').hidden=true;$('empty').hidden=false;$('csv').disabled=true;}
 function update(){
- invalidate();if(!form.checkValidity()||!catalog){$('run').disabled=true;return;}
+ invalidate();
+ $('faces-label').hidden=field('roof').value!=='gable';
+ $('row-gap-label').hidden=field('roof').value!=='flat';
+ if(!catalog){$('run').disabled=true;return;}
+ if(!form.checkValidity()){
+  $('run').disabled=true;
+  const invalid=Array.from(form.elements).find(el=>el.willValidate&&!el.validity.valid);
+  const label=invalid?.labels?.[0]?.firstChild?.textContent?.trim()||invalid?.name||'Input';
+  status(`${label}: ${invalid?.validationMessage||'Periksa nilai yang dimasukkan.'}`,true);
+  return;
+ }
  const d=read(),g=geometry(d),m=catalog.modules.find(x=>x.name===d.module),i=catalog.inverters.find(x=>x.name===d.inverter);
  $('faces-label').hidden=d.roof!=='gable';$('row-gap-label').hidden=d.roof!=='flat';
  const count=g.modules_per_face*g.face_ids.length,dc=m?count*m.power_w/1000:0,ac=i?d.inverters_per_face*g.face_ids.length*i.power_w/1000:0;
