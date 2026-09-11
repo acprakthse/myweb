@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rooftop PV Studio — Ardian Candra</title>
+<meta name="description" content="Konfigurasi rooftop PV dalam 3D dan simulasi produksi listrik dengan PySAM.">
+<link rel="icon" href="../assets/ico.ico"><link rel="stylesheet" href="studio.css">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}</script>
+</head>
+<body>
+<header><a class="brand" href="../index.html">Ardian Candra <span>/ Rooftop PV Studio</span></a><a href="../index.html">Kembali ke website ↗</a></header>
+<main>
+<aside>
+<div class="intro"><p class="eyebrow">DESAIN & SIMULASI</p><h1>Rooftop PV</h1><p>Atur atap. Susun panel. Hitung produksi.</p></div>
+<form id="design">
+<fieldset><legend>01 <span>Bangunan & atap</span></legend>
+<label>Bentuk atap<select name="roof"><option value="gable">Pelana · dua bidang</option><option value="shed">Miring · satu bidang</option><option value="flat">Datar · panel bertilt</option></select></label>
+<div class="pair"><label>Lebar (m)<input name="width" type="number" min="2" max="100" step=".1" value="16" required></label><label>Panjang (m)<input name="depth" type="number" min="2" max="100" step=".1" value="12" required></label></div>
+<div class="pair"><label>Tinggi tepi (m)<input name="height" type="number" min="1" max="50" step=".1" value="5" required></label><label>Kemiringan (°)<input name="tilt" type="number" min="0" max="60" step="1" value="20" required></label></div>
+<label>Azimut bidang pertama (°)<input name="azimuth" type="number" min="0" max="359.9" step=".1" value="180" required><small>0° utara · 90° timur · 180° selatan. Atap datar: arah panel.</small></label>
+<label id="faces-label">Bidang untuk panel<select name="faces"><option value="both">Kedua bidang</option><option value="first">Bidang pertama</option><option value="second">Bidang kedua</option></select></label>
+</fieldset>
+<fieldset><legend>02 <span>Modul & penempatan</span></legend>
+<label>Modul CEC<input name="module" list="modules" autocomplete="off" required><datalist id="modules"></datalist><small>Ketik merek/model, lalu pilih nama lengkap.</small></label>
+<div class="pair"><label>Panjang modul (m)<input name="module_length" type="number" value="2.28" min=".3" max="4" step=".001" required></label><label>Lebar modul (m)<input name="module_width" type="number" value="1.13" min=".3" max="3" step=".001" required></label></div>
+<p class="note" id="dimensions-note">Dimensi awal adalah asumsi; cocokkan dengan datasheet.</p>
+<label>Orientasi modul<select name="orientation"><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select></label>
+<div class="pair"><label>Jarak tepi (m)<input name="setback" type="number" value=".5" min="0" max="5" step=".05" required></label><label>Celah modul (m)<input name="gap" type="number" value=".05" min=".01" max="1" step=".01" required></label></div>
+<label id="row-gap-label">Celah antarbaris horizontal (m)<input name="row_gap" type="number" value=".4" min=".01" max="5" step=".05" required></label>
+</fieldset>
+<fieldset><legend>03 <span>String & inverter</span></legend>
+<label>Inverter CEC<input name="inverter" list="inverters" autocomplete="off" required><datalist id="inverters"></datalist></label>
+<div class="pair"><label>Modul / string<input name="modules_per_string" type="number" value="10" min="1" max="40" required></label><label>Inverter / bidang<input name="inverters_per_face" type="number" value="1" min="1" max="100" required></label></div>
+<p class="note">Panel diisi otomatis dalam string penuh. Tiap bidang memakai kelompok inverter terpisah.</p>
+</fieldset>
+<fieldset><legend>04 <span>Cuaca & rugi-rugi</span></legend>
+<label>Cuaca EPW<select name="weather"><option value="natuna">Natuna · file proyek</option><option value="bali">Bali · file proyek</option></select></label>
+<div class="triple"><label>Soiling (%)<input name="soiling" type="number" value="3" min="0" max="30" step=".1" required></label><label>Kabel DC (%)<input name="dc_loss" type="number" value="2" min="0" max="20" step=".1" required></label><label>Kabel AC (%)<input name="ac_loss" type="number" value="1" min="0" max="20" step=".1" required></label></div>
+<p class="note">Tambahan: mismatch 2%, koneksi dioda 0,5%. Modul monofacial. Bayangan belum dimodelkan.</p>
+</fieldset>
+<button id="run" type="submit" class="primary" disabled>Simulasikan dengan PySAM →</button>
+</form>
+<details class="connection"><summary>Koneksi simulator</summary><label>Alamat backend<input id="api" type="url" placeholder="https://nama-aplikasi.onrender.com"></label><p class="note">Isi URL Render setelah deployment. Alamat disimpan hanya di browser ini.</p><button id="connect" type="button">Periksa koneksi</button><p id="connection-state" role="status">Backend belum dikonfigurasi.</p></details>
+</aside>
+<section class="workspace">
+<div class="workspace-title"><div><p class="eyebrow">MODEL PARAMETRIK</p><h2>Ruang desain</h2></div><div class="actions"><button id="reset-view">Reset kamera</button><button id="save">Unduh desain</button></div></div>
+<div class="viewer" id="viewer"><div class="viewer-caption">Geser untuk memutar · scroll untuk zoom</div><div id="three-status" role="status">Memuat tampilan 3D…</div><div class="compass">UTARA <strong>−Z</strong><span>Timur +X</span></div></div>
+<div class="stats"><article><span>Panel terpasang</span><strong id="panel-count">—</strong></article><article><span>Kapasitas DC</span><strong id="dc-capacity">—</strong></article><article><span>Kapasitas AC</span><strong id="ac-capacity">—</strong></article><article><span>Rasio DC/AC</span><strong id="ratio">—</strong></article></div>
+<p id="layout-info" class="layout-info"></p>
+<p id="status" class="status" role="status" aria-live="polite">Editor dapat digunakan sebelum backend terhubung.</p>
+<section class="results"><div class="workspace-title"><div><p class="eyebrow">HASIL PYSAM</p><h2>Produksi energi</h2></div><button id="csv" disabled>Unduh CSV per jam</button></div>
+<div id="empty" class="empty">Jalankan simulasi untuk melihat produksi energi dari desain ini.</div>
+<div id="result-content" hidden><div class="stats results-stats"><article><span>Energi tahunan</span><strong id="annual"></strong></article><article><span>Specific yield</span><strong id="yield"></strong></article><article><span>Capacity factor DC</span><strong id="cf"></strong></article></div>
+<h3>Produksi bulanan <span>kWh</span></h3><div id="monthly" class="monthly"></div><p id="weather-info" class="note"></p><h3>Asumsi & batas hasil</h3><ul id="warnings"></ul></div></section>
+<footer>PySAM Pvsamv1 · CEC module & inverter models · Studi awal energi, bukan verifikasi desain konstruksi.</footer>
+</section>
+</main>
+<script type="module" src="app.mjs"></script>
+</body></html>
