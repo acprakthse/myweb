@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: ardian-rooftop-pv-api
+    runtime: docker
+    plan: free
+    rootDir: pv-backend
+    healthCheckPath: /health
+    envVars:
+      - key: ALLOWED_ORIGINS
+        value: https://ardiancandra.com,https://www.ardiancandra.com,https://acprakthse.github.io
