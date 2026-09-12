@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Rooftop PV Studio — Ardian Candra</title>
 <meta name="description" content="Konfigurasi rooftop PV dalam 3D dan simulasi produksi listrik dengan PySAM.">
-<link rel="icon" href="../assets/ico.ico"><link rel="stylesheet" href="studio.css">
+<link rel="icon" href="../assets/ico.ico"><link rel="stylesheet" href="studio.css?v=4">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}</script>
 </head>
 <body>
@@ -31,8 +31,25 @@
 </fieldset>
 <fieldset><legend>03 <span>String & inverter</span></legend>
 <label>Inverter CEC<input name="inverter" list="inverters" autocomplete="off" required><datalist id="inverters"></datalist></label>
-<div class="pair"><label>Modul / string<input name="modules_per_string" type="number" value="10" min="1" max="40" required></label><label>Inverter / bidang<input name="inverters_per_face" type="number" value="1" min="1" max="100" required></label></div>
-<p class="note">Panel diisi otomatis dalam string penuh. Tiap bidang memakai kelompok inverter terpisah.</p>
+<label>Mode penyusunan<select name="sizing_mode"><option value="manual">Manual · panjang string sendiri</option><option value="maximize">Maksimalkan atap · rekomendasi inverter</option><option value="fixed">Inverter tetap · panel sesuai batas inverter</option></select></label>
+<div class="pair"><label>Modul / string<input name="modules_per_string" type="number" value="10" min="1"  required></label><label>Jumlah inverter total<input name="inverter_count" type="number" value="1" min="1" max="100" required></label></div>
+<p class="note">Mode otomatis mengabaikan input Modul/string dan menghitungnya pada ringkasan. Mode Maksimalkan atap juga menghitung jumlah inverter. Jumlah inverter berlaku untuk seluruh sistem. Bidang berbeda dapat berbagi inverter melalui MPPT terpisah; semua MPPT diasumsikan identik, satu string per input.</p>
+<details><summary>Data datasheet & suhu desain</summary><p class="note">Wajib dilengkapi untuk mode otomatis. Nilai kosong tidak dianggap sebagai batas yang terverifikasi. Suhu adalah suhu sel, bukan suhu udara. Periksa rating konektor secara terpisah.</p><label>Suhu sel minimum desain (°C)<input name="design_tmin" type="number" min="-90" max="70" step="any" placeholder="Isi dari datasheet / dasar desain"></label>
+<label>Suhu sel maksimum desain (°C)<input name="design_tmax" type="number" min="-30" max="120" step="any" placeholder="Isi dari datasheet / dasar desain"></label>
+<label>Koefisien suhu Vmp (%/°C)<input name="beta_vmp_pct" type="number" min="-2" max="-0.0001" step="any" placeholder="Isi dari datasheet / dasar desain"></label>
+<label>Tegangan sistem maksimum modul (V)<input name="module_system_max_v" type="number" min=".01" step="any" placeholder="Isi dari datasheet / dasar desain"></label>
+<label>Tegangan DC maksimum inverter (V)<input name="inverter_dc_max_v" type="number" min=".01" step="any" placeholder="Isi dari datasheet / dasar desain"></label>
+<label>Tegangan MPPT minimum (V)<input name="mppt_min_v" type="number" min=".01" step="any" placeholder="Isi dari datasheet / dasar desain"></label>
+<label>Tegangan MPPT maksimum (V)<input name="mppt_max_v" type="number" min=".01" step="any" placeholder="Isi dari datasheet / dasar desain"></label>
+<label>Jumlah MPPT per inverter<input name="mppt_count" type="number" min="1" max="100" step="1" placeholder="Isi dari datasheet / dasar desain"></label>
+<label>Input per MPPT (1 string/input)<input name="inputs_per_mppt" type="number" min="1" max="100" step="1" placeholder="Isi dari datasheet / dasar desain"></label>
+<label>Arus operasi maksimum per MPPT (A)<input name="operating_current_mppt" type="number" min=".01" step="any" placeholder="Isi dari datasheet / dasar desain"></label>
+<label>Arus hubung singkat maksimum per MPPT (A)<input name="short_circuit_current_mppt" type="number" min=".01" step="any" placeholder="Isi dari datasheet / dasar desain"></label>
+<label>Batas arus DC total inverter (A)<input name="inverter_dc_current_a" type="number" min=".01" step="any" placeholder="Isi dari datasheet / dasar desain"></label>
+<label>Kapasitas PV maksimum per inverter (kWp)<input name="max_dc_power_kw" type="number" min=".01" step="any" placeholder="Isi dari datasheet / dasar desain"></label>
+<label>Faktor koreksi arus desain (≥1)<input name="current_factor" type="number" min="1" max="3" step="any" placeholder="Isi dari datasheet / dasar desain"></label>
+</details>
+<p id="sizing-info" class="note" role="status">Hubungkan backend untuk menghitung susunan listrik.</p>
 </fieldset>
 <fieldset><legend>04 <span>Cuaca & rugi-rugi</span></legend>
 <label>Cuaca EPW<select name="weather"><option value="natuna">Natuna · file proyek</option><option value="bali">Bali · file proyek</option><option value="upload">Unggah EPW sendiri</option></select></label>
@@ -47,9 +64,11 @@
 <section class="workspace">
 <div class="workspace-title"><div><p class="eyebrow">MODEL PARAMETRIK</p><h2>Ruang desain</h2></div><div class="actions"><button id="reset-view">Reset kamera</button><button id="save">Unduh desain</button></div></div>
 <div class="viewer" id="viewer"><div class="viewer-caption">Geser untuk memutar · scroll untuk zoom</div><div id="three-status" role="status">Memuat tampilan 3D…</div><div class="compass">UTARA <strong>−Z</strong><span>Timur +X</span></div></div>
-<div class="stats"><article><span>Panel terpasang</span><strong id="panel-count">—</strong></article><article><span>Kapasitas DC</span><strong id="dc-capacity">—</strong></article><article><span>Kapasitas AC</span><strong id="ac-capacity">—</strong></article><article><span>Rasio DC/AC</span><strong id="ratio">—</strong></article></div>
+<div class="stats"><article><span>Posisi tersedia di atap</span><strong id="roof-positions">—</strong></article><article><span>Panel terpasang</span><strong id="panel-count">—</strong></article><article><span>Kapasitas DC</span><strong id="dc-capacity">—</strong></article><article><span>Kapasitas AC</span><strong id="ac-capacity">—</strong></article><article><span>Rasio DC/AC</span><strong id="ratio">—</strong></article></div>
+<p id="ac-equation" class="layout-info"></p>
 <p id="layout-info" class="layout-info"></p>
 <p id="status" class="status" role="status" aria-live="polite">Editor dapat digunakan sebelum backend terhubung.</p>
+<section class="calculations"><h2>Perhitungan kapasitas & batas listrik</h2><p id="calculation-state" class="note">Hubungkan backend untuk melihat Voc, Vmp/MPPT, Imp, Isc, dan batas desain.</p><div class="calculation-scroll" tabindex="0" role="region" aria-label="Tabel perhitungan listrik"><table><thead><tr><th scope="col">Parameter</th><th scope="col">Rumus & substitusi</th><th scope="col">Hasil</th><th scope="col">Batas</th><th scope="col">Margin</th><th scope="col">Sumber / dasar</th><th scope="col">Status</th></tr></thead><tbody id="calculations-body"></tbody></table></div></section>
 <section class="results"><div class="workspace-title"><div><p class="eyebrow">HASIL PYSAM</p><h2>Produksi energi</h2></div><button id="csv" disabled>Unduh CSV per jam</button></div>
 <div id="empty" class="empty">Jalankan simulasi untuk melihat produksi energi dari desain ini.</div>
 <div id="result-content" hidden><div class="stats results-stats"><article><span>Energi tahunan</span><strong id="annual"></strong></article><article><span>Specific yield</span><strong id="yield"></strong></article><article><span>Capacity factor DC</span><strong id="cf"></strong></article></div>
@@ -57,5 +76,5 @@
 <footer>PySAM Pvsamv1 · CEC module & inverter models · Studi awal energi, bukan verifikasi desain konstruksi.</footer>
 </section>
 </main>
-<script type="module" src="app.mjs?v=2"></script>
+<script type="module" src="app.mjs?v=4"></script>
 </body></html>
