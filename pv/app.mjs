@@ -3,13 +3,16 @@ import {API_BASE} from './config.js';
 const $=id=>document.getElementById(id), form=$('design'), field=n=>form.elements.namedItem(n);
 const numNames=['width','depth','height','tilt','azimuth','setback','gap','row_gap','module_length','module_width','modules_per_string','inverter_count','soiling','dc_loss','ac_loss'];
 const sizingFields=['design_tmin', 'design_tmax', 'beta_vmp_pct', 'module_system_max_v', 'inverter_dc_max_v', 'mppt_min_v', 'mppt_max_v', 'mppt_count', 'inputs_per_mppt', 'operating_current_mppt', 'short_circuit_current_mppt', 'inverter_dc_current_a', 'max_dc_power_kw', 'current_factor'];
+const batteryKeys=['capacity_per_unit_kwh', 'units', 'charge_max_kw', 'discharge_max_kw', 'charge_efficiency_pct', 'discharge_efficiency_pct', 'soc_min_pct', 'soc_max_pct', 'ambient_temperature_c'];
 const fmt=(v,n=1)=>new Intl.NumberFormat('id-ID',{maximumFractionDigits:n}).format(v);
 let catalog=null, current=null, result=null, draw=null, busy=false, catalogBase=null;
 let layoutVersion=0,layoutTimer=null,layoutReady=false,resolvedSizing=null;
-function read(){const d=Object.fromEntries(new FormData(form));numNames.forEach(k=>d[k]=Number(d[k]));sizingFields.forEach(k=>d[k]=d[k]===''?null:Number(d[k]));return d;}
+function read(){const d=Object.fromEntries(new FormData(form));numNames.forEach(k=>d[k]=Number(d[k]));sizingFields.forEach(k=>d[k]=d[k]===''?null:Number(d[k]));d.battery=$('battery-enabled').checked?Object.fromEntries(batteryKeys.map(k=>[k,Number(field('battery_'+k).value)])):null;for(const k of batteryKeys)delete d['battery_'+k];return d;}
 function status(message,error=false){$('status').textContent=message;$('status').classList.toggle('error',error);}
-function invalidate(){result=null;$('result-content').hidden=true;$('empty').hidden=false;$('csv').disabled=true;}
+function invalidate(){result=null;$('battery-results').hidden=true;$('battery-csv').disabled=true;$('result-content').hidden=true;$('empty').hidden=false;$('csv').disabled=true;}
+function batteryReady(){return !$('battery-enabled').checked||!!$('load-file').files[0];}
 function update(){
+ const enabled=$('battery-enabled').checked;$('battery-inputs').hidden=!enabled;for(const k of batteryKeys)field('battery_'+k).disabled=!enabled;$('load-file').disabled=!enabled;
  invalidate();$('calculations-body').replaceChildren();$('calculation-state').textContent='Revisi input: menunggu perhitungan terbaru.';layoutReady=false;resolvedSizing=null;layoutVersion++;clearTimeout(layoutTimer);
  field('modules_per_string').readOnly=field('sizing_mode').value!=='manual';field('inverter_count').readOnly=field('sizing_mode').value==='maximize';
  const upload=field('weather').value==='upload';$('epw-label').hidden=!upload;$('epw-file').required=upload;$('epw-file').disabled=!upload;
@@ -54,7 +57,7 @@ async function refreshLayout(version){
   $('sizing-info').textContent=`Rentang string: ${p.string_min}–${p.string_max} modul. ${p.validation==='incomplete'?'Validasi listrik belum lengkap. Lihat tabel perhitungan di ruang desain.':'Pemeriksaan awal lulus untuk data yang dimasukkan.'} `+p.groups.map((x,i)=>`Kelompok ${i+1}: ${x.inverter_count} inverter × ${x.strings_per_inverter} string; `+x.mppt_allocation.map((e,j)=>`MPPT ${j+1}: bidang ${e.face_id+1}, ${e.strings} string`).join(' / ')).join('; ');
 
   if(draw&&count<=10000){$('three-status').hidden=true;draw(resolved,g);}else if(count>10000){$('three-status').hidden=false;$('three-status').textContent='Desain >10.000 panel: tampilan 3D tidak diperbarui. Jumlah numerik dan simulasi tetap tersedia.';}
-  $('run').disabled=busy;status(p.validation==='incomplete'?'Desain siap untuk simulasi energi awal. Validasi listrik belum lengkap.':'Susunan siap. Jalankan simulasi PySAM.');
+  $('run').disabled=busy||!batteryReady();status(!batteryReady()?'Pilih CSV beban untuk optimasi baterai.':p.validation==='incomplete'?'Desain siap untuk simulasi energi awal. Validasi listrik belum lengkap.':'Susunan siap. Jalankan simulasi PySAM.');
  }catch(e){if(version===layoutVersion){layoutReady=false;$('run').disabled=true;$('sizing-info').textContent=e.message;status(e.message,true);}}
 }
 function renderCalculations(p){
@@ -101,29 +104,55 @@ $('epw-file').addEventListener('change',()=>{
  $('epw-file').setCustomValidity(file&&(!file.name.toLowerCase().endsWith('.epw')||file.size>10*1024*1024)?'Pilih file .epw berukuran maksimum 10 MB.':'');update();
 });
 form.addEventListener('submit',async e=>{
- e.preventDefault();if(!form.reportValidity()||busy||!layoutReady)return;let base;try{base=endpoint();}catch{document.querySelector('.connection').open=true;$('api').focus();status('Isi alamat backend pada Koneksi simulator terlebih dahulu.',true);return;}
- const design=read(),weatherFile=$('epw-file').files[0];busy=true;$('run').disabled=true;invalidate();status('Menjalankan PySAM… jika backend sedang tidur, proses awal dapat memerlukan sekitar satu menit.');
+ e.preventDefault();if(!form.reportValidity()||busy||!layoutReady||!batteryReady())return;let base;try{base=endpoint();}catch{document.querySelector('.connection').open=true;$('api').focus();status('Isi alamat backend pada Koneksi simulator terlebih dahulu.',true);return;}
+ const design=read(),weatherFile=$('epw-file').files[0],loadFile=$('load-file').files[0];busy=true;$('run').disabled=true;invalidate();status(design.battery?'Menjalankan PV, optimasi MILP, dan replay PySAM Battery…':'Menjalankan simulasi PySAM PV…');
  try{
   if(catalogBase!==base){await connect();if(catalogBase!==base)throw Error($('connection-state').textContent);}
   let url=base+'/simulate',body=JSON.stringify(design),headers={'Content-Type':'application/json'};
-  if(design.weather==='upload'){
+  if(design.battery){
+   body=new FormData();body.append('design',JSON.stringify(design));body.append('load_file',loadFile);if(design.weather==='upload')body.append('weather_file',weatherFile);headers={};url=base+'/simulate/battery';
+  }else if(design.weather==='upload'){
    if(!weatherFile)throw Error('Pilih file EPW terlebih dahulu.');
    body=new FormData();body.append('design',JSON.stringify(design));body.append('weather_file',weatherFile);headers={};url=base+'/simulate/epw';
   }
   const r=await fetch(url,{method:'POST',headers,body,signal:AbortSignal.timeout(180000)});
-  const data=await r.json();if(!r.ok)throw Error(typeof data.detail==='string'?data.detail:'Parameter tidak valid. Periksa input desain.');
-  if(JSON.stringify(design)!==JSON.stringify(read())||weatherFile!==$('epw-file').files[0]||base!==endpoint()){status('Desain berubah selama simulasi. Jalankan kembali untuk desain terbaru.');return;}
+  const data=await r.json();if(!r.ok)throw Error(r.status===404?'Perbarui backend agar endpoint simulasi baterai tersedia.':typeof data.detail==='string'?data.detail:'Parameter tidak valid. Periksa input desain/baterai.');
+  if(JSON.stringify(design)!==JSON.stringify(read())||weatherFile!==$('epw-file').files[0]||base!==endpoint()||(design.battery&&loadFile!==$('load-file').files[0])){status('Desain berubah selama simulasi. Jalankan kembali untuk desain terbaru.');return;}
   renderCalculations(data.sizing);result=data;$('empty').hidden=true;$('result-content').hidden=false;$('csv').disabled=false;
   $('annual').textContent=fmt(data.annual_kwh/1000,2)+' MWh';$('yield').textContent=fmt(data.specific_yield,0)+' kWh/kWp';$('cf').textContent=fmt(data.capacity_factor_dc,1)+'%';
   const names=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];const max=Math.max(...data.monthly_kwh,1);$('monthly').replaceChildren();
   data.monthly_kwh.forEach((v,i)=>{const el=document.createElement('div');el.className='month';const b=document.createElement('b');b.textContent=fmt(v,0);const bar=document.createElement('div');bar.className='bar';bar.style.setProperty('--bar',`${Math.max(2,v/max*150)}px`);const label=document.createElement('span');label.textContent=names[i];el.append(b,bar,label);el.title=`${names[i]}: ${fmt(v)} kWh`;$('monthly').append(el);});
   $('weather-info').textContent=`File: ${data.weather_source||design.weather} · Cuaca: ${data.weather_location.join(', ')} · 8.760 interval × 1 jam · ${data.engine}`;
   $('warnings').replaceChildren();data.warnings.forEach(w=>{const li=document.createElement('li');li.textContent=w;$('warnings').append(li);});
+  if(data.battery)renderBattery(data.battery);
   status('Simulasi selesai. Hasil sesuai dengan desain yang tampil.');
  }catch(e){status(e.name==='TimeoutError'?'Waktu tunggu habis. Periksa koneksi dan coba kembali.':e.message==='Failed to fetch'?'Backend tidak dapat dihubungi. Periksa URL backend, status layanan, dan pengaturan CORS.':e.message,true);}
- finally{busy=false;$('run').disabled=!layoutReady||!form.checkValidity();}
+ finally{busy=false;$('run').disabled=!layoutReady||!form.checkValidity()||!batteryReady();}
 });
 function download(name,text,type){const u=URL.createObjectURL(new Blob([text],{type}));const a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);}
+$('load-file').addEventListener('change',()=>{
+ const f=$('load-file').files[0];$('load-file').setCustomValidity(f&&(!f.name.toLowerCase().endsWith('.csv')||f.size>2*1024*1024)?'Gunakan CSV maksimum 2 MB.':'');
+ $('load-state').textContent=f?`${f.name} · ${fmt(f.size/1024)} KB. Isi dan urutan akan divalidasi backend.`:'Pilih CSV beban rumah.';update();
+});
+$('load-example').onclick=()=>{
+ const profile=[.25,.25,.25,.25,.25,.4,.8,1,.4,.35,.35,.4,.5,.4,.35,.4,.6,1.2,1.5,1.3,1,.6,.4,.3];
+ download('contoh_beban_sintetis_8760.csv','hour,load_kw\n'+Array.from({length:8760},(_,i)=>`${i+1},${profile[i%24]}`).join('\n'),'text/csv');
+};
+function renderBattery(b){
+ const v=b.summary;$('battery-results').hidden=false;$('battery-csv').disabled=false;
+ $('ssr-base').textContent=fmt(v.baseline_ssr_pct,2)+'%';$('ssr-milp').textContent=fmt(v.milp_ssr_pct,2)+'%';$('ssr-actual').textContent=fmt(v.pysam_ssr_pct,2)+'%';
+ $('battery-model-info').textContent=`${fmt(v.nominal_battery_kwh,2)} kWh nominal · ${fmt(v.usable_window_kwh,2)} kWh rentang SOC awal · charge ${fmt(b.config.charge_max_kw)} / discharge ${fmt(b.config.discharge_max_kw)} kW AC · ${b.topology}. Beban: ${b.load_source}.`;
+ $('battery-gain').textContent=`SSR = 100 × (1 − impor jaringan / beban). Beban sistem ${fmt(v.load_kwh)} kWh = rumah ${fmt(v.household_load_kwh)} + siaga inverter ${fmt(v.pv_inverter_aux_kwh,3)}. Replay PySAM mengurangi impor ${fmt(v.grid_import_reduction_kwh)} kWh; SSR naik ${fmt(v.ssr_gain_percentage_points,2)} poin persentase.`;
+ $('battery-solver').textContent=`${b.solver.name}: ${b.solver.proven_optimal_within_tolerance?'optimal untuk model MILP dalam toleransi':'solusi feasible, optimalitas belum terbukti'} · gap ${b.solver.mip_gap==null?'tidak tersedia':fmt(100*b.solver.mip_gap,6)+'%'} · ${fmt(b.solver.elapsed_seconds,2)} detik. Hasil nonlinear PySAM tidak diklaim optimum global.`;
+ const rows=[['Impor jaringan (kWh)',v.baseline_grid_import_kwh,v.milp_grid_import_kwh,v.pysam_grid_import_kwh],['Charge (kWh AC)','—',b.hourly.milp_charge_kw.reduce((a,x)=>a+x,0),v.pysam_charge_kwh],['Discharge (kWh AC)','—',b.hourly.milp_discharge_kw.reduce((a,x)=>a+x,0),v.pysam_discharge_kwh],['Ekspor jaringan (kWh)','—',b.hourly.milp_grid_export_kw.reduce((a,x)=>a+x,0),v.pysam_grid_export_kwh],['SOC akhir (%)','—',v.milp_final_soc_pct,v.pysam_final_soc_pct]];
+ $('battery-comparison').replaceChildren();for(const row of rows){const tr=document.createElement('tr');for(const x of row){const td=document.createElement('td');td.textContent=typeof x==='number'?fmt(x,2):x;tr.append(td);}$('battery-comparison').append(tr);}
+ $('battery-terminal').textContent=`SOC awal ${fmt(v.initial_soc_pct)}%. Kapasitas tersisa akhir tahun dalam preset PySAM: ${fmt(v.pysam_final_capacity_pct,2)}%. Selisih dispatch maksimum MILP–PySAM ${fmt(v.max_dispatch_difference_kw,3)} kW. Residual neraca daya maksimum ${fmt(v.power_balance_max_error_kw,6)} kW.`;
+ $('battery-warnings').replaceChildren();for(const warning of b.warnings){const li=document.createElement('li');li.textContent=warning;$('battery-warnings').append(li);}
+}
+$('battery-csv').onclick=()=>{
+ if(!result?.battery)return;const h=result.battery.hourly,keys=Object.keys(h);
+ download('pv_battery_milp_pysam_hourly.csv','hour,'+keys.join(',')+'\n'+Array.from({length:8760},(_,i)=>[i+1,...keys.map(k=>h[k][i])].join(',')).join('\n'),'text/csv');
+};
 $('save').onclick=()=>{if(!form.reportValidity())return;download('rooftop-design.json',JSON.stringify({inputs:read(),resolved_sizing:resolvedSizing},null,2),'application/json');};
 $('csv').onclick=()=>{if(result)download('pysam-hourly.csv','interval,timestep_hours,pv_power_kw\n'+result.hourly_kw.map((v,i)=>`${i+1},1,${v}`).join('\n'),'text/csv');};
 try{const r=await fetch('./catalog.json');if(!r.ok)throw Error();catalog=await r.json();$('catalog-state').textContent='Katalog pratinjau. Klik Periksa koneksi untuk membaca CSV backend terbaru.';field('module').value='LONGi Green Energy Technology Co Ltd LR5-72HPH-550M';field('inverter').value='Fronius International GmbH: Fronius Primo 100-1 208-240 {240V}';options('modules','LONGi');options('inverters','Fronius');update();}catch{status('Katalog bawaan gagal dimuat. Hubungkan backend untuk membaca CSV CEC.',true);}
