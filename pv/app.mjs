@@ -1,3 +1,4 @@
+import {dailyProfile,dayLabel,chartSVG,seriesSpec} from './daily.mjs';
 import {geometry} from './geometry.mjs';
 import {API_BASE} from './config.js';
 const $=id=>document.getElementById(id), form=$('design'), field=n=>form.elements.namedItem(n);
@@ -8,8 +9,9 @@ const fmt=(v,n=1)=>new Intl.NumberFormat('id-ID',{maximumFractionDigits:n}).form
 let catalog=null, current=null, result=null, draw=null, busy=false, catalogBase=null;
 let layoutVersion=0,layoutTimer=null,layoutReady=false,resolvedSizing=null;
 function read(){const d=Object.fromEntries(new FormData(form));numNames.forEach(k=>d[k]=Number(d[k]));sizingFields.forEach(k=>d[k]=d[k]===''?null:Number(d[k]));d.battery=$('battery-enabled').checked?Object.fromEntries(batteryKeys.map(k=>[k,Number(field('battery_'+k).value)])):null;for(const k of batteryKeys)delete d['battery_'+k];return d;}
-function status(message,error=false){$('status').textContent=message;$('status').classList.toggle('error',error);}
-function invalidate(){result=null;$('battery-results').hidden=true;$('battery-csv').disabled=true;$('result-content').hidden=true;$('empty').hidden=false;$('csv').disabled=true;}
+const publicText=s=>String(s).replace(/PySAM(?: Pvsamv1| Battery)?/gi,'simulator energi').replace(/\bSAM\b/g,'model');
+function status(message,error=false){message=publicText(message);$('status').textContent=message;$('status').classList.toggle('error',error);}
+function invalidate(){result=null;$('daily-results').hidden=true;$('report-section').hidden=true;$('report-status').textContent='';$('battery-results').hidden=true;$('battery-csv').disabled=true;$('result-content').hidden=true;$('empty').hidden=false;$('csv').disabled=true;}
 function batteryReady(){return !$('battery-enabled').checked||!!$('load-file').files[0];}
 function update(){
  const enabled=$('battery-enabled').checked;$('battery-inputs').hidden=!enabled;for(const k of batteryKeys)field('battery_'+k).disabled=!enabled;$('load-file').disabled=!enabled;
@@ -57,7 +59,7 @@ async function refreshLayout(version){
   $('sizing-info').textContent=`Rentang string: ${p.string_min}–${p.string_max} modul. ${p.validation==='incomplete'?'Validasi listrik belum lengkap. Lihat tabel perhitungan di ruang desain.':'Pemeriksaan awal lulus untuk data yang dimasukkan.'} `+p.groups.map((x,i)=>`Kelompok ${i+1}: ${x.inverter_count} inverter × ${x.strings_per_inverter} string; `+x.mppt_allocation.map((e,j)=>`MPPT ${j+1}: bidang ${e.face_id+1}, ${e.strings} string`).join(' / ')).join('; ');
 
   if(draw&&count<=10000){$('three-status').hidden=true;draw(resolved,g);}else if(count>10000){$('three-status').hidden=false;$('three-status').textContent='Desain >10.000 panel: tampilan 3D tidak diperbarui. Jumlah numerik dan simulasi tetap tersedia.';}
-  $('run').disabled=busy||!batteryReady();status(!batteryReady()?'Pilih CSV beban untuk optimasi baterai.':p.validation==='incomplete'?'Desain siap untuk simulasi energi awal. Validasi listrik belum lengkap.':'Susunan siap. Jalankan simulasi PySAM.');
+  $('run').disabled=busy||!batteryReady();status(!batteryReady()?'Pilih CSV beban untuk optimasi baterai.':p.validation==='incomplete'?'Desain siap untuk simulasi energi awal. Validasi listrik belum lengkap.':'Susunan siap. Jalankan simulasi energi.');
  }catch(e){if(version===layoutVersion){layoutReady=false;$('run').disabled=true;$('sizing-info').textContent=e.message;status(e.message,true);}}
 }
 function renderCalculations(p){
@@ -94,8 +96,8 @@ async function connect(){
   options('modules',field('module').value);options('inverters',field('inverter').value);
   $('catalog-state').textContent=`CSV backend: ${fmt(catalog.modules.length,0)} modul · ${fmt(catalog.inverters.length,0)} inverter. Ketik merek/model untuk mencari.`;
   try{localStorage.setItem('rooftop-api',base);}catch{}
-  update();$('connection-state').textContent='Terhubung ke '+data.engine+' · katalog CSV siap.';
- }catch(e){if(attempt===connectionAttempt){catalogBase=null;$('connection-state').textContent=e.message;}}
+  update();$('connection-state').textContent='Terhubung ke '+publicText(data.engine)+' · katalog CSV siap.';
+ }catch(e){if(attempt===connectionAttempt){catalogBase=null;$('connection-state').textContent=publicText(e.message);}}
 }
 $('connect').onclick=connect;
 $('api').addEventListener('input',()=>{connectionAttempt++;catalogBase=null;layoutReady=false;resolvedSizing=null;layoutVersion++;$('calculations-body').replaceChildren();$('calculation-state').textContent='Alamat backend berubah. Periksa koneksi kembali.';$('run').disabled=true;invalidate();$('connection-state').textContent='Alamat berubah. Klik Periksa koneksi untuk memuat katalog backend ini.';});
@@ -105,7 +107,7 @@ $('epw-file').addEventListener('change',()=>{
 });
 form.addEventListener('submit',async e=>{
  e.preventDefault();if(!form.reportValidity()||busy||!layoutReady||!batteryReady())return;let base;try{base=endpoint();}catch{document.querySelector('.connection').open=true;$('api').focus();status('Isi alamat backend pada Koneksi simulator terlebih dahulu.',true);return;}
- const design=read(),weatherFile=$('epw-file').files[0],loadFile=$('load-file').files[0];busy=true;$('run').disabled=true;invalidate();status(design.battery?'Menjalankan PV, optimasi MILP, dan replay PySAM Battery…':'Menjalankan simulasi PySAM PV…');
+ const design=read(),weatherFile=$('epw-file').files[0],loadFile=$('load-file').files[0];busy=true;$('run').disabled=true;invalidate();status(design.battery?'Menjalankan PV, optimasi MILP, dan simulasi baterai…':'Menjalankan simulasi energi PV…');
  try{
   if(catalogBase!==base){await connect();if(catalogBase!==base)throw Error($('connection-state').textContent);}
   let url=base+'/simulate',body=JSON.stringify(design),headers={'Content-Type':'application/json'};
@@ -122,9 +124,9 @@ form.addEventListener('submit',async e=>{
   $('annual').textContent=fmt(data.annual_kwh/1000,2)+' MWh';$('yield').textContent=fmt(data.specific_yield,0)+' kWh/kWp';$('cf').textContent=fmt(data.capacity_factor_dc,1)+'%';
   const names=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];const max=Math.max(...data.monthly_kwh,1);$('monthly').replaceChildren();
   data.monthly_kwh.forEach((v,i)=>{const el=document.createElement('div');el.className='month';const b=document.createElement('b');b.textContent=fmt(v,0);const bar=document.createElement('div');bar.className='bar';bar.style.setProperty('--bar',`${Math.max(2,v/max*150)}px`);const label=document.createElement('span');label.textContent=names[i];el.append(b,bar,label);el.title=`${names[i]}: ${fmt(v)} kWh`;$('monthly').append(el);});
-  $('weather-info').textContent=`File: ${data.weather_source||design.weather} · Cuaca: ${data.weather_location.join(', ')} · 8.760 interval × 1 jam · ${data.engine}`;
-  $('warnings').replaceChildren();data.warnings.forEach(w=>{const li=document.createElement('li');li.textContent=w;$('warnings').append(li);});
-  if(data.battery)renderBattery(data.battery);
+  $('weather-info').textContent=`File: ${data.weather_source||design.weather} · Cuaca: ${data.weather_location.join(', ')} · 8.760 interval × 1 jam · simulator energi`;
+  $('warnings').replaceChildren();data.warnings.forEach(w=>{const li=document.createElement('li');li.textContent=publicText(w);$('warnings').append(li);});
+  if(data.battery){renderBattery(data.battery);renderDaily();}$('report-section').hidden=false;
   status('Simulasi selesai. Hasil sesuai dengan desain yang tampil.');
  }catch(e){status(e.name==='TimeoutError'?'Waktu tunggu habis. Periksa koneksi dan coba kembali.':e.message==='Failed to fetch'?'Backend tidak dapat dihubungi. Periksa URL backend, status layanan, dan pengaturan CORS.':e.message,true);}
  finally{busy=false;$('run').disabled=!layoutReady||!form.checkValidity()||!batteryReady();}
@@ -142,21 +144,40 @@ function renderBattery(b){
  const v=b.summary;$('battery-results').hidden=false;$('battery-csv').disabled=false;
  $('ssr-base').textContent=fmt(v.baseline_ssr_pct,2)+'%';$('ssr-milp').textContent=fmt(v.milp_ssr_pct,2)+'%';$('ssr-actual').textContent=fmt(v.pysam_ssr_pct,2)+'%';
  $('battery-model-info').textContent=`${fmt(v.nominal_battery_kwh,2)} kWh nominal · ${fmt(v.usable_window_kwh,2)} kWh rentang SOC awal · charge ${fmt(b.config.charge_max_kw)} / discharge ${fmt(b.config.discharge_max_kw)} kW AC · ${b.topology}. Beban: ${b.load_source}.`;
- $('battery-gain').textContent=`SSR = 100 × (1 − impor jaringan / beban). Beban sistem ${fmt(v.load_kwh)} kWh = rumah ${fmt(v.household_load_kwh)} + siaga inverter ${fmt(v.pv_inverter_aux_kwh,3)}. Replay PySAM mengurangi impor ${fmt(v.grid_import_reduction_kwh)} kWh; SSR naik ${fmt(v.ssr_gain_percentage_points,2)} poin persentase.`;
- $('battery-solver').textContent=`${b.solver.name}: ${b.solver.proven_optimal_within_tolerance?'optimal untuk model MILP dalam toleransi':'solusi feasible, optimalitas belum terbukti'} · gap ${b.solver.mip_gap==null?'tidak tersedia':fmt(100*b.solver.mip_gap,6)+'%'} · ${fmt(b.solver.elapsed_seconds,2)} detik. Hasil nonlinear PySAM tidak diklaim optimum global.`;
+ $('battery-gain').textContent=`SSR = 100 × (1 − impor jaringan / beban). Beban sistem ${fmt(v.load_kwh)} kWh = rumah ${fmt(v.household_load_kwh)} + siaga inverter ${fmt(v.pv_inverter_aux_kwh,3)}. Simulasi baterai mengurangi impor ${fmt(v.grid_import_reduction_kwh)} kWh; SSR naik ${fmt(v.ssr_gain_percentage_points,2)} poin persentase.`;
+ $('battery-solver').textContent=`${b.solver.name}: ${b.solver.proven_optimal_within_tolerance?'optimal untuk model MILP dalam toleransi':'solusi feasible, optimalitas belum terbukti'} · gap ${b.solver.mip_gap==null?'tidak tersedia':fmt(100*b.solver.mip_gap,6)+'%'} · ${fmt(b.solver.elapsed_seconds,2)} detik. Hasil nonlinear baterai tidak diklaim optimum global.`;
  const rows=[['Impor jaringan (kWh)',v.baseline_grid_import_kwh,v.milp_grid_import_kwh,v.pysam_grid_import_kwh],['Charge (kWh AC)','—',b.hourly.milp_charge_kw.reduce((a,x)=>a+x,0),v.pysam_charge_kwh],['Discharge (kWh AC)','—',b.hourly.milp_discharge_kw.reduce((a,x)=>a+x,0),v.pysam_discharge_kwh],['Ekspor jaringan (kWh)','—',b.hourly.milp_grid_export_kw.reduce((a,x)=>a+x,0),v.pysam_grid_export_kwh],['SOC akhir (%)','—',v.milp_final_soc_pct,v.pysam_final_soc_pct]];
  $('battery-comparison').replaceChildren();for(const row of rows){const tr=document.createElement('tr');for(const x of row){const td=document.createElement('td');td.textContent=typeof x==='number'?fmt(x,2):x;tr.append(td);}$('battery-comparison').append(tr);}
- $('battery-terminal').textContent=`SOC awal ${fmt(v.initial_soc_pct)}%. Kapasitas tersisa akhir tahun dalam preset PySAM: ${fmt(v.pysam_final_capacity_pct,2)}%. Selisih dispatch maksimum MILP–PySAM ${fmt(v.max_dispatch_difference_kw,3)} kW. Residual neraca daya maksimum ${fmt(v.power_balance_max_error_kw,6)} kW.`;
- $('battery-warnings').replaceChildren();for(const warning of b.warnings){const li=document.createElement('li');li.textContent=warning;$('battery-warnings').append(li);}
+ $('battery-terminal').textContent=`SOC awal ${fmt(v.initial_soc_pct)}%. Kapasitas tersisa akhir tahun dalam model baterai: ${fmt(v.pysam_final_capacity_pct,2)}%. Selisih dispatch maksimum MILP–simulasi baterai ${fmt(v.max_dispatch_difference_kw,3)} kW. Residual neraca daya maksimum ${fmt(v.power_balance_max_error_kw,6)} kW.`;
+ $('battery-warnings').replaceChildren();for(const warning of b.warnings){const li=document.createElement('li');li.textContent=publicText(warning);$('battery-warnings').append(li);}
 }
 $('battery-csv').onclick=()=>{
  if(!result?.battery)return;const h=result.battery.hourly,keys=Object.keys(h);
- download('pv_battery_milp_pysam_hourly.csv','hour,'+keys.join(',')+'\n'+Array.from({length:8760},(_,i)=>[i+1,...keys.map(k=>h[k][i])].join(',')).join('\n'),'text/csv');
+ download('pv_battery_dispatch_hourly.csv','hour,'+keys.map(k=>k.replace('pysam_','simulation_')).join(',')+'\n'+Array.from({length:8760},(_,i)=>[i+1,...keys.map(k=>h[k][i])].join(',')).join('\n'),'text/csv');
 };
 $('save').onclick=()=>{if(!form.reportValidity())return;download('rooftop-design.json',JSON.stringify({inputs:read(),resolved_sizing:resolvedSizing},null,2),'application/json');};
-$('csv').onclick=()=>{if(result)download('pysam-hourly.csv','interval,timestep_hours,pv_power_kw\n'+result.hourly_kw.map((v,i)=>`${i+1},1,${v}`).join('\n'),'text/csv');};
+$('csv').onclick=()=>{if(result)download('pv-hourly.csv','interval,timestep_hours,pv_power_kw\n'+result.hourly_kw.map((v,i)=>`${i+1},1,${v}`).join('\n'),'text/csv');};
 try{const r=await fetch('./catalog.json');if(!r.ok)throw Error();catalog=await r.json();$('catalog-state').textContent='Katalog pratinjau. Klik Periksa koneksi untuk membaca CSV backend terbaru.';field('module').value='LONGi Green Energy Technology Co Ltd LR5-72HPH-550M';field('inverter').value='Fronius International GmbH: Fronius Primo 100-1 208-240 {240V}';options('modules','LONGi');options('inverters','Fronius');update();}catch{status('Katalog bawaan gagal dimuat. Hubungkan backend untuk membaca CSV CEC.',true);}
 if($('api').value.trim())void connect();
+for(let day=1;day<=365;day++){const o=document.createElement('option');o.value=day;o.textContent=dayLabel(day);$('daily-day').append(o);}
+function renderDaily(){
+ if(!result?.battery)return;
+ const mode=$('daily-mode').value,day=Number($('daily-day').value),p=dailyProfile(result.battery.hourly,mode,day);
+ $('daily-results').hidden=false;$('daily-day-label').hidden=mode==='average';
+ $('daily-caption').textContent=mode==='average'?'Rata-rata setiap jam dari 365 hari. Semua energi di bawah adalah rata-rata kWh per hari.':`${dayLabel(day)} · hari ke-${day} · 24 interval waktu lokal file cuaca.`;
+ $('daily-power').innerHTML=chartSVG(p);$('daily-soc').innerHTML=chartSVG(p,true);
+ $('daily-legend').replaceChildren();for(const [,label,color] of seriesSpec){const item=document.createElement('span');item.textContent=label;item.style.borderColor=color;$('daily-legend').append(item);}
+ const sum=k=>p[k].reduce((a,x)=>a+x,0);$('daily-energy').textContent=`${mode==='average'?'Rata-rata energi/hari':'Energi hari terpilih'}: beban ${fmt(sum('effective_load_kw'),2)} kWh · charge ${fmt(sum('milp_charge_kw'),2)} kWh · discharge ${fmt(sum('milp_discharge_kw'),2)} kWh · impor ${fmt(sum('milp_grid_import_kw'),2)} kWh · ekspor ${fmt(sum('milp_grid_export_kw'),2)} kWh.`;
+}
+$('daily-mode').onchange=renderDaily;$('daily-day').onchange=renderDaily;
+$('report-pdf').onclick=async()=>{
+ if(!result)return;const snapshot=result,button=$('report-pdf');button.disabled=true;$('report-status').textContent='Menyiapkan laporan PDF…';
+ try{const r=await fetch(endpoint()+'/report/pdf',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({result:snapshot,mode:$('daily-mode').value,day:Number($('daily-day').value)}),signal:AbortSignal.timeout(60000)});
+ if(!r.ok){const e=await r.json().catch(()=>({}));throw Error(r.status===404?'Perbarui backend untuk mengaktifkan laporan PDF.':e.detail||'Laporan gagal dibuat.');}
+ const blob=await r.blob();if(result!==snapshot)return;download('rooftop_pv_report.pdf',blob,'application/pdf');$('report-status').textContent='Laporan PDF berhasil diunduh.';
+ }catch(e){if(result===snapshot)$('report-status').textContent=publicText(e.message);}finally{button.disabled=false;}
+};
+
 try{
  const THREE=await import('three'),{OrbitControls}=await import('three/addons/controls/OrbitControls.js');
  const host=$('viewer'),scene=new THREE.Scene();scene.background=new THREE.Color('#eaf0eb');
@@ -199,3 +220,4 @@ try{
  new ResizeObserver(()=>{const w=host.clientWidth,h=host.clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);}).observe(host);
  $('three-status').hidden=true;if(current)draw(current,geometry(current));reset();renderer.setAnimationLoop(()=>{controls.update();renderer.render(scene,camera);});
 }catch(e){$('three-status').textContent='Tampilan 3D tidak tersedia. Pastikan WebGL aktif dan CDN Three.js dapat diakses. Konfigurasi numerik tetap dapat digunakan.';}
+

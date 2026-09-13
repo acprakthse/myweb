@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Rooftop PV Studio — Ardian Candra</title>
-<meta name="description" content="Konfigurasi rooftop PV dalam 3D dan simulasi produksi listrik dengan PySAM.">
-<link rel="icon" href="../assets/ico.ico"><link rel="stylesheet" href="studio.css?v=5">
+<meta name="description" content="Konfigurasi rooftop PV dalam 3D dan simulasi produksi listrik energi.">
+<link rel="icon" href="../assets/ico.ico"><link rel="stylesheet" href="studio.css?v=6">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}</script>
 </head>
 <body>
@@ -57,7 +57,7 @@
 <div class="triple"><label>Soiling (%)<input name="soiling" type="number" value="3" min="0" max="30" step=".1" required></label><label>Kabel DC (%)<input name="dc_loss" type="number" value="2" min="0" max="20" step=".1" required></label><label>Kabel AC (%)<input name="ac_loss" type="number" value="1" min="0" max="20" step=".1" required></label></div>
 <p class="note">Tambahan: mismatch 2%, koneksi dioda 0,5%. Modul monofacial. Bayangan belum dimodelkan.</p>
 </fieldset>
-<fieldset><legend>05 <span>Baterai residential · MILP</span></legend><label class="battery-toggle"><input id="battery-enabled" type="checkbox">Aktifkan baterai & optimasi SSR</label><div id="battery-inputs" hidden><p class="note">Kapasitas tetap sesuai pilihan produk; MILP hanya mengatur charge/discharge. Model lithium-ion generik SAM, AC-coupled dengan PCS tersendiri.</p><label>Kapasitas nominal per unit (kWh)<input name="battery_capacity_per_unit_kwh" type="number" value="5.12" min="0.01" max="500" step="any" required disabled></label>
+<fieldset><legend>05 <span>Baterai residential · MILP</span></legend><label class="battery-toggle"><input id="battery-enabled" type="checkbox">Aktifkan baterai & optimasi SSR</label><div id="battery-inputs" hidden><p class="note">Kapasitas tetap sesuai pilihan produk; MILP hanya mengatur charge/discharge. Model lithium-ion generik, AC-coupled dengan PCS tersendiri.</p><label>Kapasitas nominal per unit (kWh)<input name="battery_capacity_per_unit_kwh" type="number" value="5.12" min="0.01" max="500" step="any" required disabled></label>
 <label>Jumlah unit baterai<input name="battery_units" type="number" value="1" min="1" max="20" step="1" required disabled></label>
 <label>Daya charge maksimum sistem (kW AC)<input name="battery_charge_max_kw" type="number" value="3" min="0.01" max="100" step="any" required disabled></label>
 <label>Daya discharge maksimum sistem (kW AC)<input name="battery_discharge_max_kw" type="number" value="3" min="0.01" max="100" step="any" required disabled></label>
@@ -67,7 +67,7 @@
 <label>SOC maksimum (%)<input name="battery_soc_max_pct" type="number" value="90" min="0.1" max="100" step="any" required disabled></label>
 <label>Suhu ruang baterai (°C)<input name="battery_ambient_temperature_c" type="number" value="25" min="0" max="45" step="any" required disabled></label>
 <p class="note">Jumlah unit menambah kWh, bukan otomatis daya PCS. Efisiensi di atas adalah efisiensi konverter per arah, bukan round-trip efficiency baterai. SOC awal = minimum; MILP menjaga energi akhir = awal.</p><label>Profil beban rumah (.csv)<input id="load-file" type="file" accept=".csv" disabled><small>Header hour,load_kw; 8.760 baris, jam 1–8760; desimal titik. Urutan mengikuti waktu lokal EPW, tanpa 29 Februari. Maksimum 2 MB.</small></label><button id="load-example" type="button">Unduh contoh CSV beban</button><p id="load-state" class="note">Contoh bersifat sintetis; ganti dengan profil beban rumah sebelum memakai hasil untuk keputusan.</p></div></fieldset>
-<button id="run" type="submit" class="primary" disabled>Simulasikan dengan PySAM →</button>
+<button id="run" type="submit" class="primary" disabled>Jalankan simulasi →</button>
 </form>
 <details class="connection"><summary>Koneksi simulator</summary><label>Alamat backend<input id="api" type="url" placeholder="https://alamat-dari-terminal.trycloudflare.com"></label><p class="note">Untuk internet: tempel URL HTTPS trycloudflare.com dari terminal, tanpa /health. Lokal: http://127.0.0.1:8001. Laptop dan tunnel harus tetap menyala.</p><button id="connect" type="button">Periksa koneksi</button><p id="connection-state" role="status">Backend belum dikonfigurasi.</p></details>
 </aside>
@@ -79,13 +79,17 @@
 <p id="layout-info" class="layout-info"></p>
 <p id="status" class="status" role="status" aria-live="polite">Editor dapat digunakan sebelum backend terhubung.</p>
 <section class="calculations"><h2>Perhitungan kapasitas & batas listrik</h2><p id="calculation-state" class="note">Hubungkan backend untuk melihat Voc, Vmp/MPPT, Imp, Isc, dan batas desain.</p><div class="calculation-scroll" tabindex="0" role="region" aria-label="Tabel perhitungan listrik"><table><thead><tr><th scope="col">Parameter</th><th scope="col">Rumus & substitusi</th><th scope="col">Hasil</th><th scope="col">Batas</th><th scope="col">Margin</th><th scope="col">Sumber / dasar</th><th scope="col">Status</th></tr></thead><tbody id="calculations-body"></tbody></table></div></section>
-<section class="results"><div class="workspace-title"><div><p class="eyebrow">HASIL PYSAM</p><h2>Produksi energi</h2></div><button id="csv" disabled>Unduh CSV per jam</button></div>
+<section class="results"><div class="workspace-title"><div><p class="eyebrow">HASIL SIMULASI</p><h2>Produksi energi</h2></div><button id="csv" disabled>Unduh CSV per jam</button></div>
 <div id="empty" class="empty">Jalankan simulasi untuk melihat produksi energi dari desain ini.</div>
 <div id="result-content" hidden><div class="stats results-stats"><article><span>Energi tahunan</span><strong id="annual"></strong></article><article><span>Specific yield</span><strong id="yield"></strong></article><article><span>Capacity factor DC</span><strong id="cf"></strong></article></div>
 <h3>Produksi bulanan <span>kWh</span></h3><div id="monthly" class="monthly"></div><p id="weather-info" class="note"></p><h3>Asumsi & batas hasil</h3><ul id="warnings"></ul></div></section>
-<section id="battery-results" class="results battery-results" hidden><div class="workspace-title"><div><p class="eyebrow">KAPASITAS TETAP · DISPATCH MILP</p><h2>PV + baterai</h2></div><button id="battery-csv" type="button" disabled>Unduh dispatch per jam</button></div><p id="battery-model-info" class="note"></p><div class="stats results-stats"><article><span>SSR tanpa baterai</span><strong id="ssr-base">—</strong></article><article><span>SSR model MILP</span><strong id="ssr-milp">—</strong></article><article><span>SSR replay PySAM</span><strong id="ssr-actual">—</strong></article></div><p id="battery-gain" class="layout-info"></p><p id="battery-solver" class="note"></p><div class="calculation-scroll"><table class="battery-table"><thead><tr><th scope="col">Perhitungan</th><th scope="col">Tanpa baterai</th><th scope="col">MILP linear</th><th scope="col">PySAM Battery</th></tr></thead><tbody id="battery-comparison"></tbody></table></div><p id="battery-terminal" class="note"></p><details><summary>Asumsi & batas model baterai</summary><ul id="battery-warnings"></ul></details></section>
-<footer>PySAM Pvsamv1 · CEC module & inverter models · Studi awal energi, bukan verifikasi desain konstruksi.</footer>
+<section id="battery-results" class="results battery-results" hidden><div class="workspace-title"><div><p class="eyebrow">KAPASITAS TETAP · DISPATCH MILP</p><h2>PV + baterai</h2></div><button id="battery-csv" type="button" disabled>Unduh dispatch per jam</button></div><p id="battery-model-info" class="note"></p><div class="stats results-stats"><article><span>SSR tanpa baterai</span><strong id="ssr-base">—</strong></article><article><span>SSR model MILP</span><strong id="ssr-milp">—</strong></article><article><span>SSR simulasi baterai</span><strong id="ssr-actual">—</strong></article></div><p id="battery-gain" class="layout-info"></p><p id="battery-solver" class="note"></p><div class="calculation-scroll"><table class="battery-table"><thead><tr><th scope="col">Perhitungan</th><th scope="col">Tanpa baterai</th><th scope="col">MILP linear</th><th scope="col">Simulasi baterai</th></tr></thead><tbody id="battery-comparison"></tbody></table></div><p id="battery-terminal" class="note"></p><details><summary>Asumsi & batas model baterai</summary><ul id="battery-warnings"></ul></details></section>
+<section id="daily-results" class="results" hidden><p class="eyebrow">DISPATCH MILP · PROFIL 24 JAM</p><h2>Grafik operasi harian</h2>
+<div class="daily-controls"><label>Tampilan<select id="daily-mode"><option value="day">Satu hari</option><option value="average">Rata-rata harian setahun</option></select></label><label id="daily-day-label">Tanggal (tanpa tahun kabisat)<select id="daily-day"></select></label></div>
+<p id="daily-caption" class="note"></p><div id="daily-legend" class="daily-legend"></div><div id="daily-power" class="daily-chart"></div><div id="daily-soc" class="daily-chart"></div><p id="daily-energy" class="layout-info"></p><p class="note">Charge/discharge ditampilkan sebagai besaran positif. SOC adalah nilai akhir setiap interval. Rata-rata SOC merupakan statistik 365 hari, bukan lintasan operasi satu hari nyata. Grafik menampilkan jadwal MILP; hasil simulasi baterai dapat berbeda.</p></section>
+<section id="report-section" class="results" hidden><p class="eyebrow">LAPORAN SIMULASI</p><h2>Simpan hasil analisis</h2><p class="note">PDF berisi konfigurasi, produksi, perhitungan listrik, hasil baterai dan grafik sesuai pilihan hari di atas.</p><button id="report-pdf" type="button" class="primary">Unduh laporan PDF</button><p id="report-status" class="note" role="status"></p></section>
+<footer>CEC module & inverter models · Studi awal energi, bukan verifikasi desain konstruksi.</footer>
 </section>
 </main>
-<script type="module" src="app.mjs?v=5"></script>
+<script type="module" src="app.mjs?v=6"></script>
 </body></html>
