@@ -25,15 +25,15 @@
 <label>Modul CEC<input name="module" list="modules" autocomplete="off" required><datalist id="modules"></datalist><small>Ketik merek/model, lalu pilih nama lengkap.</small></label>
 <div class="pair"><label>Panjang modul (m)<input name="module_length" type="number" value="2.28" min=".3" max="4" step=".001" required></label><label>Lebar modul (m)<input name="module_width" type="number" value="1.13" min=".3" max="3" step=".001" required></label></div>
 <p class="note" id="dimensions-note">Dimensi awal adalah asumsi; cocokkan dengan datasheet.</p>
-<label>Orientasi modul<select name="orientation"><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select></label>
+<div class="pair"><label id="count-first-label">Panel bidang pertama<input name="panel_count_first" type="number" min="0" max="100000" step="1" placeholder="Kosong = seluruh posisi atap"></label><label id="count-second-label">Panel bidang kedua<input name="panel_count_second" type="number" min="0" max="100000" step="1" placeholder="Kosong = seluruh posisi atap"></label></div><p class="note">Jumlah panel independen dari modul/string; setiap bidang dapat berbeda. Kosong mengikuti kapasitas geometris atap, 0 berarti tidak memasang panel pada bidang tersebut.</p><label>Orientasi modul<select name="orientation"><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select></label>
 <div class="pair"><label>Jarak tepi (m)<input name="setback" type="number" value=".5" min="0" max="5" step=".05" required></label><label>Celah modul (m)<input name="gap" type="number" value=".05" min=".01" max="1" step=".01" required></label></div>
 <label id="row-gap-label">Celah antarbaris horizontal (m)<input name="row_gap" type="number" value=".4" min=".01" max="5" step=".01" required></label>
 </fieldset>
 <fieldset><legend>03 <span>String & inverter</span></legend>
 <label>Inverter CEC<input name="inverter" list="inverters" autocomplete="off" required><datalist id="inverters"></datalist></label>
-<label>Mode penyusunan<select name="sizing_mode"><option value="manual">Manual · panjang string sendiri</option><option value="maximize">Maksimalkan atap · rekomendasi inverter</option><option value="fixed">Inverter tetap · panel sesuai batas inverter</option></select></label>
-<div class="pair"><label>Modul / string<input name="modules_per_string" type="number" value="10" min="1"  required></label><label>Jumlah inverter total<input name="inverter_count" type="number" value="1" min="1" max="100" required></label></div>
-<p class="note">Mode otomatis mengabaikan input Modul/string dan menghitungnya pada ringkasan. Mode Maksimalkan atap juga menghitung jumlah inverter. Jumlah inverter berlaku untuk seluruh sistem. Bidang berbeda dapat berbagi inverter melalui MPPT terpisah; semua MPPT diasumsikan identik, satu string per input.</p>
+<label>Mode penyusunan<select name="sizing_mode"><option value="manual">Manual · panjang string sendiri</option><option value="maximize">Panel tetap · rekomendasi string & inverter</option><option value="fixed">Panel & inverter tetap · cari panjang string</option></select></label>
+<div class="pair"><label>Modul / string<input name="modules_per_string" type="number" value="12" min="1"  required></label><label>Jumlah inverter total<input name="inverter_count" type="number" value="1" min="1" max="100" required></label></div>
+<p class="note">Mode otomatis mencari panjang string tanpa mengubah jumlah panel. Rekomendasi inverter juga mencari jumlah inverter total. Panjang string saat ini sama untuk seluruh sistem; bidang berbeda masuk MPPT terpisah. Panel yang belum terhubung tidak disimulasikan dan harus diselesaikan sebelum menjalankan simulasi.</p><button id="apply-panel-suggestion" type="button" hidden>Terapkan jumlah panel sesuai string utuh</button>
 <details><summary>Data datasheet & suhu desain</summary><p class="note">Wajib dilengkapi untuk mode otomatis. Nilai kosong tidak dianggap sebagai batas yang terverifikasi. Suhu adalah suhu sel, bukan suhu udara. Periksa rating konektor secara terpisah.</p><label>Suhu sel minimum desain (°C)<input name="design_tmin" type="number" min="-90" max="70" step="any" placeholder="Isi dari datasheet / dasar desain"></label>
 <label>Suhu sel maksimum desain (°C)<input name="design_tmax" type="number" min="-30" max="120" step="any" placeholder="Isi dari datasheet / dasar desain"></label>
 <label>Koefisien suhu Vmp (%/°C)<input name="beta_vmp_pct" type="number" min="-2" max="-0.0001" step="any" placeholder="Isi dari datasheet / dasar desain"></label>
@@ -92,5 +92,5 @@
 <footer>CEC module & inverter models · Studi awal energi, bukan verifikasi desain konstruksi.</footer>
 </section>
 </main>
-<script type="module" src="app.mjs?v=7"></script>
+<script type="module" src="app.mjs?v=8"></script>
 </body></html>

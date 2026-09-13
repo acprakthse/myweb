@@ -1,9 +1,9 @@
 import {dailyProfile,dayLabel,chartSVG,seriesSpec} from './daily.mjs';
-import {geometry} from './geometry.mjs';
+import {geometry} from './geometry.mjs?v=2';
 import {API_BASE} from './config.js';
 const $=id=>document.getElementById(id), form=$('design'), field=n=>form.elements.namedItem(n);
 const numNames=['width','depth','height','tilt','azimuth','setback','gap','row_gap','module_length','module_width','modules_per_string','inverter_count','soiling','dc_loss','ac_loss'];
-const sizingFields=['design_tmin', 'design_tmax', 'beta_vmp_pct', 'module_system_max_v', 'inverter_dc_max_v', 'mppt_min_v', 'mppt_max_v', 'mppt_count', 'inputs_per_mppt', 'operating_current_mppt', 'short_circuit_current_mppt', 'inverter_dc_current_a', 'max_dc_power_kw', 'current_factor'];
+const sizingFields=['panel_count_first','panel_count_second','design_tmin', 'design_tmax', 'beta_vmp_pct', 'module_system_max_v', 'inverter_dc_max_v', 'mppt_min_v', 'mppt_max_v', 'mppt_count', 'inputs_per_mppt', 'operating_current_mppt', 'short_circuit_current_mppt', 'inverter_dc_current_a', 'max_dc_power_kw', 'current_factor'];
 const batteryKeys=['capacity_per_unit_kwh', 'units', 'charge_max_kw', 'discharge_max_kw', 'charge_efficiency_pct', 'discharge_efficiency_pct', 'soc_min_pct', 'soc_max_pct', 'ambient_temperature_c'];
 const fmt=(v,n=1)=>new Intl.NumberFormat('id-ID',{maximumFractionDigits:n}).format(v);
 let catalog=null, current=null, result=null, draw=null, busy=false, catalogBase=null;
@@ -14,6 +14,9 @@ function status(message,error=false){message=publicText(message);$('status').tex
 function invalidate(){result=null;$('finance-output').hidden=true;$('finance-status').textContent='';$('daily-results').hidden=true;$('report-section').hidden=true;$('report-status').textContent='';$('battery-results').hidden=true;$('battery-csv').disabled=true;$('result-content').hidden=true;$('empty').hidden=false;$('csv').disabled=true;}
 function batteryReady(){return !$('battery-enabled').checked||!!$('load-file').files[0];}
 function update(){
+ $('apply-panel-suggestion').hidden=true;
+ $('count-second-label').hidden=field('roof').value!=='gable'||field('faces').value==='first';
+ $('count-first-label').hidden=field('roof').value==='gable'&&field('faces').value==='second';
  const enabled=$('battery-enabled').checked;$('battery-inputs').hidden=!enabled;for(const k of batteryKeys)field('battery_'+k).disabled=!enabled;$('load-file').disabled=!enabled;
  invalidate();$('calculations-body').replaceChildren();$('calculation-state').textContent='Revisi input: menunggu perhitungan terbaru.';layoutReady=false;resolvedSizing=null;layoutVersion++;clearTimeout(layoutTimer);
  field('modules_per_string').readOnly=field('sizing_mode').value!=='manual';field('inverter_count').readOnly=field('sizing_mode').value==='maximize';
@@ -30,13 +33,13 @@ function update(){
  }
  const d=read(),g=geometry(d),m=catalog.modules.find(x=>x.name===d.module),i=catalog.inverters.find(x=>x.name===d.inverter);
  $('faces-label').hidden=d.roof!=='gable';$('row-gap-label').hidden=d.roof!=='flat';
- const count=g.modules_per_face*g.face_ids.length,dc=m?count*m.power_w/1000:0,ac=i?d.inverter_count*i.power_w/1000:0;
+ const count=g.placed_total,dc=m?count*m.power_w/1000:0,ac=i?d.inverter_count*i.power_w/1000:0;
  $('panel-count').textContent=fmt(count,0);$('dc-capacity').textContent=m?`${fmt(dc)} kWp`:'—';$('ac-capacity').textContent=i?`${fmt(ac)} kW`:'—';$('ratio').textContent=ac?fmt(dc/ac,2):'—';$('ac-equation').textContent=i?`${d.inverter_count} inverter total × ${fmt(i.power_w/1000,3)} kW = ${fmt(ac,3)} kW`:'Pilih inverter CEC.';
- $('layout-info').textContent=`${g.face_ids.length} bidang aktif · ${g.strings_per_face} string/bidang · ${g.capacity_per_face-g.modules_per_face} posisi tersisa/bidang agar string utuh. Panel biru: bidang pertama; hijau: bidang kedua.`;
+ $('layout-info').textContent=`${g.face_ids.length} bidang aktif · ${g.placed_total} panel ditempatkan. Jumlah tidak berubah saat panjang string diubah.`;
  current=d;$('roof-positions').textContent=fmt(g.capacity_per_face*g.face_ids.length,0);if(draw&&count<=10000)draw(d,g);$('run').disabled=true;
  if(!m||!i)status('Pilih nama lengkap modul dan inverter dari katalog.',true);
 
- else if(!count)status('Atap tidak memuat satu string penuh. Ubah dimensi atau modul/string.',true);
+ else if(!count)status('Belum ada panel ditempatkan pada bidang aktif.',true);
  else status('Menghitung susunan panel dan batas listrik…');
  if(m&&i){const version=layoutVersion;layoutTimer=setTimeout(()=>refreshLayout(version),300);}
 }
@@ -48,14 +51,21 @@ async function refreshLayout(version){
   if(!r.ok)throw Error(typeof p.detail==='string'?p.detail:'Perbarui backend dan periksa data desain.');
   if(!Array.isArray(p.calculations)||typeof p.inverter_count!=='number')throw Error('Perbarui backend ke versi 1.3.0 agar jumlah inverter total dan tabel perhitungan tersedia.');
   renderCalculations(p);
-  if(!p.can_simulate){$('panel-count').textContent='—';$('dc-capacity').textContent='—';$('ac-capacity').textContent=fmt(p.ac_kw,3)+' kW';$('ratio').textContent='—';throw Error(p.errors.join(' '));}
+  resolvedSizing=p;
+  $('apply-panel-suggestion').hidden=!(p.pending_total>0&&p.suggested_counts);
+  if(p.suggested_counts)$('apply-panel-suggestion').textContent='Ubah panel menjadi '+Object.entries(p.suggested_counts).map(([face,count])=>`bidang ${Number(face)+1}: ${count}`).join(' / ')+` (total ${p.connected_total})`;
+  if(!p.can_simulate){
+   $('panel-count').textContent=fmt(p.placed_total);$('dc-capacity').textContent=fmt(p.dc_kw)+' kWp';$('ac-capacity').textContent=fmt(p.ac_kw,3)+' kW';
+   $('layout-info').textContent=Object.entries(p.placed_by_face).map(([id,count])=>`Bidang ${Number(id)+1}: ${count} ditempatkan / ${p.connected_by_face[id]} masuk string utuh`).join(' · ')+`. Total ${p.pending_total} belum terhubung. Panel tidak dihapus.`;
+   throw Error(p.errors.join(' '));
+  }
   const resolved={...d,modules_per_string:p.modules_per_string,inverter_count:p.inverter_count};
-  const g=geometry(resolved);g.modules_per_face=p.modules_per_face;g.strings_per_face=p.strings_per_face;
+  const g=geometry(resolved);
   current=resolved;layoutReady=true;resolvedSizing=p;
   const faces=g.face_ids.length,m=catalog.modules.find(x=>x.name===d.module),i=catalog.inverters.find(x=>x.name===d.inverter);
-  const count=p.modules_per_face*faces,dc=count*m.power_w/1000,ac=p.ac_kw;
+  const count=p.placed_total,dc=count*m.power_w/1000,ac=p.ac_kw;
   $('panel-count').textContent=fmt(count,0);$('dc-capacity').textContent=fmt(dc)+' kWp';$('ac-capacity').textContent=fmt(ac)+' kW';$('ratio').textContent=fmt(dc/ac,2);
-  $('layout-info').textContent=`${p.positions_per_face*faces} posisi atap · ${count} panel terpasang · ${p.unused_per_face*faces} posisi tersisa. ${p.modules_per_string} modul/string · ${p.strings_per_face} string/bidang · ${p.inverter_count} inverter TOTAL sistem. Pembatas: ${p.reason}.`;
+  $('layout-info').textContent=`${p.positions_per_face*faces} posisi atap · ${count} panel ditempatkan · ${p.connected_total} terhubung · ${p.pending_total} belum terhubung. ${p.modules_per_string} modul/string. `+Object.entries(p.strings_by_face).map(([face,amount])=>`Bidang ${Number(face)+1}: ${amount} string`).join(' · ');
   $('sizing-info').textContent=`Rentang string: ${p.string_min}–${p.string_max} modul. ${p.validation==='incomplete'?'Validasi listrik belum lengkap. Lihat tabel perhitungan di ruang desain.':'Pemeriksaan awal lulus untuk data yang dimasukkan.'} `+p.groups.map((x,i)=>`Kelompok ${i+1}: ${x.inverter_count} inverter × ${x.strings_per_inverter} string; `+x.mppt_allocation.map((e,j)=>`MPPT ${j+1}: bidang ${e.face_id+1}, ${e.strings} string`).join(' / ')).join('; ');
 
   if(draw&&count<=10000){$('three-status').hidden=true;draw(resolved,g);}else if(count>10000){$('three-status').hidden=false;$('three-status').textContent='Desain >10.000 panel: tampilan 3D tidak diperbarui. Jumlah numerik dan simulasi tetap tersedia.';}
@@ -99,6 +109,11 @@ async function connect(){
   update();$('connection-state').textContent='Terhubung ke '+publicText(data.engine)+' · katalog CSV siap.';
  }catch(e){if(attempt===connectionAttempt){catalogBase=null;$('connection-state').textContent=publicText(e.message);}}
 }
+$('apply-panel-suggestion').onclick=()=>{
+ const p=resolvedSizing;if(!p?.suggested_counts)return;
+ for(const [face,count] of Object.entries(p.suggested_counts))field(Number(face)===0?'panel_count_first':'panel_count_second').value=count;
+ field('modules_per_string').value=p.modules_per_string;update();
+};
 $('connect').onclick=connect;
 $('api').addEventListener('input',()=>{connectionAttempt++;catalogBase=null;layoutReady=false;resolvedSizing=null;layoutVersion++;$('calculations-body').replaceChildren();$('calculation-state').textContent='Alamat backend berubah. Periksa koneksi kembali.';$('run').disabled=true;invalidate();$('connection-state').textContent='Alamat berubah. Klik Periksa koneksi untuk memuat katalog backend ini.';});
 $('epw-file').addEventListener('change',()=>{
@@ -228,8 +243,9 @@ try{
    if(!g.face_ids.includes(face))continue;
    const local=new THREE.Group();local.position.copy(roof.position);local.rotation.x=sign*roofTilt;model.add(local);
    const geom=new THREE.BoxGeometry(g.w,.045,g.l),mat=new THREE.MeshStandardMaterial({color:face===0?0x204b70:0x2a6c60,metalness:.35,roughness:.36});
-   const panels=new THREE.InstancedMesh(geom,mat,g.modules_per_face),dummy=new THREE.Object3D();
-   for(let n=0;n<g.modules_per_face;n++){
+   const panelCount=Math.min(g.capacity_per_face,g.placed_by_face[String(face)]||0);
+   const panels=new THREE.InstancedMesh(geom,mat,panelCount),dummy=new THREE.Object3D();
+   for(let n=0;n<panelCount;n++){
     const col=n%g.cols,row=Math.floor(n/g.cols);
     const x=-d.width/2+d.setback+g.w/2+col*(g.w+d.gap);
     const z=-g.length/2+d.setback+g.footprint/2+row*(g.footprint+g.gap);

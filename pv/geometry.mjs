@@ -7,7 +7,9 @@ export function geometry(d){
  const gap=d.roof==='flat'?d.row_gap:d.gap;
  const cols=Math.max(0,Math.floor((d.width-2*d.setback+d.gap)/(w+d.gap)+1e-9));
  const rows=Math.max(0,Math.floor((length-2*d.setback+gap)/(footprint+gap)+1e-9));
- const capacity=cols*rows,count=Math.floor(capacity/d.modules_per_string)*d.modules_per_string;
+ const capacity=cols*rows;
  const ids=d.roof==='gable'&&d.faces==='both'?[0,1]:[d.roof==='gable'&&d.faces==='second'?1:0];
- return {cols,rows,capacity_per_face:capacity,modules_per_face:count,strings_per_face:count/d.modules_per_string,face_ids:ids,w,l,span,length,footprint,gap,angle};
+ const placed_by_face=Object.fromEntries(ids.map(i=>[String(i),(i===0?d.panel_count_first:d.panel_count_second)??capacity]));
+ const count=placed_by_face[String(ids[0])];
+ return {placed_by_face,placed_total:Object.values(placed_by_face).reduce((a,b)=>a+b,0),cols,rows,capacity_per_face:capacity,modules_per_face:count,strings_per_face:Math.floor(count/d.modules_per_string),face_ids:ids,w,l,span,length,footprint,gap,angle};
 }
