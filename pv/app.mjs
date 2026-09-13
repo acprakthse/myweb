@@ -11,7 +11,7 @@ let layoutVersion=0,layoutTimer=null,layoutReady=false,resolvedSizing=null;
 function read(){const d=Object.fromEntries(new FormData(form));numNames.forEach(k=>d[k]=Number(d[k]));sizingFields.forEach(k=>d[k]=d[k]===''?null:Number(d[k]));d.battery=$('battery-enabled').checked?Object.fromEntries(batteryKeys.map(k=>[k,Number(field('battery_'+k).value)])):null;for(const k of batteryKeys)delete d['battery_'+k];return d;}
 const publicText=s=>String(s).replace(/PySAM(?: Pvsamv1| Battery)?/gi,'simulator energi').replace(/\bSAM\b/g,'model');
 function status(message,error=false){message=publicText(message);$('status').textContent=message;$('status').classList.toggle('error',error);}
-function invalidate(){result=null;$('daily-results').hidden=true;$('report-section').hidden=true;$('report-status').textContent='';$('battery-results').hidden=true;$('battery-csv').disabled=true;$('result-content').hidden=true;$('empty').hidden=false;$('csv').disabled=true;}
+function invalidate(){result=null;$('finance-output').hidden=true;$('finance-status').textContent='';$('daily-results').hidden=true;$('report-section').hidden=true;$('report-status').textContent='';$('battery-results').hidden=true;$('battery-csv').disabled=true;$('result-content').hidden=true;$('empty').hidden=false;$('csv').disabled=true;}
 function batteryReady(){return !$('battery-enabled').checked||!!$('load-file').files[0];}
 function update(){
  const enabled=$('battery-enabled').checked;$('battery-inputs').hidden=!enabled;for(const k of batteryKeys)field('battery_'+k).disabled=!enabled;$('load-file').disabled=!enabled;
@@ -148,7 +148,7 @@ function renderBattery(b){
  $('battery-solver').textContent=`${b.solver.name}: ${b.solver.proven_optimal_within_tolerance?'optimal untuk model MILP dalam toleransi':'solusi feasible, optimalitas belum terbukti'} · gap ${b.solver.mip_gap==null?'tidak tersedia':fmt(100*b.solver.mip_gap,6)+'%'} · ${fmt(b.solver.elapsed_seconds,2)} detik. Hasil nonlinear baterai tidak diklaim optimum global.`;
  const rows=[['Impor jaringan (kWh)',v.baseline_grid_import_kwh,v.milp_grid_import_kwh,v.pysam_grid_import_kwh],['Charge (kWh AC)','—',b.hourly.milp_charge_kw.reduce((a,x)=>a+x,0),v.pysam_charge_kwh],['Discharge (kWh AC)','—',b.hourly.milp_discharge_kw.reduce((a,x)=>a+x,0),v.pysam_discharge_kwh],['Ekspor jaringan (kWh)','—',b.hourly.milp_grid_export_kw.reduce((a,x)=>a+x,0),v.pysam_grid_export_kwh],['SOC akhir (%)','—',v.milp_final_soc_pct,v.pysam_final_soc_pct]];
  $('battery-comparison').replaceChildren();for(const row of rows){const tr=document.createElement('tr');for(const x of row){const td=document.createElement('td');td.textContent=typeof x==='number'?fmt(x,2):x;tr.append(td);}$('battery-comparison').append(tr);}
- $('battery-terminal').textContent=`SOC awal ${fmt(v.initial_soc_pct)}%. Kapasitas tersisa akhir tahun dalam model baterai: ${fmt(v.pysam_final_capacity_pct,2)}%. Selisih dispatch maksimum MILP–simulasi baterai ${fmt(v.max_dispatch_difference_kw,3)} kW. Residual neraca daya maksimum ${fmt(v.power_balance_max_error_kw,6)} kW.`;
+ $('battery-terminal').textContent=`SOC awal ${fmt(v.initial_soc_pct)}%. Kapasitas tersisa akhir tahun dalam model baterai: ${fmt(v.pysam_final_capacity_pct,2)}%. Selisih dispatch maksimum MILP–simulasi baterai ${fmt(v.max_dispatch_difference_kw,3)} kW. SOC aktual ${fmt(v.soc_min_actual_pct,5)}–${fmt(v.soc_max_actual_pct,5)}%; koreksi kontrol ${v.soc_retry_count||0} kali. Residual neraca daya maksimum ${fmt(v.power_balance_max_error_kw,6)} kW.`;
  $('battery-warnings').replaceChildren();for(const warning of b.warnings){const li=document.createElement('li');li.textContent=publicText(warning);$('battery-warnings').append(li);}
 }
 $('battery-csv').onclick=()=>{
@@ -178,6 +178,27 @@ $('report-pdf').onclick=async()=>{
  }catch(e){if(result===snapshot)$('report-status').textContent=publicText(e.message);}finally{button.disabled=false;}
 };
 
+
+const money=x=>'Rp '+fmt(x,0);
+let financeVersion=0;
+$('finance-form').addEventListener('input',()=>{financeVersion++;if(result)delete result.finance;$('finance-output').hidden=true;$('finance-status').textContent='Asumsi berubah. Hitung ulang investasi.';});
+$('finance-form').onsubmit=async e=>{
+ e.preventDefault();if(!result){$('finance-status').textContent='Jalankan simulasi energi terlebih dahulu.';return;}
+ if(!$('finance-form').reportValidity())return;
+ const snapshot=result,version=++financeVersion;const config=Object.fromEntries(Array.from(new FormData($('finance-form')),([k,v])=>[k,Number(v)]));
+ $('finance-run').disabled=true;$('finance-output').hidden=true;delete result.finance;$('finance-status').textContent='Menghitung arus kas dan NPV…';
+ try{let load_kw=null;const file=$('finance-load').files[0];
+ if(!snapshot.battery&&file){if(file.size>2*1024*1024)throw Error('CSV maksimum 2 MB.');const lines=(await file.text()).replace(/^\uFEFF/,'').trim().split(/\r?\n/);if(lines.shift()!=='hour,load_kw'||lines.length!==8760)throw Error('CSV harus berheader hour,load_kw dan berisi 8.760 baris.');load_kw=lines.map((line,i)=>{const a=line.split(',');if(a.length!==2||Number(a[0])!==i+1||a[1].trim()===''||!Number.isFinite(Number(a[1]))||Number(a[1])<0)throw Error('CSV beban tidak valid pada jam '+(i+1));return Number(a[1]);});}
+ const r=await fetch(endpoint()+'/finance',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({result:snapshot,config,load_kw})});const f=await r.json();if(!r.ok)throw Error(r.status===404?'Perbarui backend untuk menu investasi.':f.detail||'Perhitungan gagal.');
+ if(result!==snapshot||version!==financeVersion)return;result.finance=f;
+ $('finance-output').hidden=false;$('finance-pv').textContent=money(f.pv_capex);$('finance-bess').textContent=money(f.bess_capex);$('finance-total').textContent=money(f.total_capex);$('finance-npv').replaceChildren();$('finance-rows').replaceChildren();$('finance-notes').replaceChildren();
+ if(!f.available){$('finance-status').textContent=f.message;return;}
+ for(const [label,key] of [['PV saja','pv'],...(f.has_battery?[['PV + BESS','combined'],['Tambahan BESS terhadap PV saja','incremental_bess']]:[])]){const p=document.createElement('p');p.textContent=`${label}: NPV ${money(f[key].npv)} · payback terdiskonto ${f[key].discounted_payback_year?f[key].discounted_payback_year+' tahun':'belum tercapai dalam horizon'}`;$('finance-npv').append(p);}
+ for(const row of f.rows){const tr=document.createElement('tr');for(const key of ['year','baseline_bill','total_bill','total_savings','om','replacement','total_cashflow','discounted_cashflow']){const td=document.createElement('td');td.textContent=key==='year'?row[key]:money(row[key]);tr.append(td);}$('finance-rows').append(tr);}
+ for(const note of f.assumptions){const li=document.createElement('li');li.textContent=note;$('finance-notes').append(li);}
+ $('finance-status').textContent='NPV = −CAPEX + Σ arus kas bersih tahun t / (1 + diskonto)^t. Nilai investasi dan proyeksi ini ikut dimasukkan ke laporan PDF.';
+ }catch(err){if(result===snapshot&&version===financeVersion)$('finance-status').textContent=publicText(err.message);}finally{$('finance-run').disabled=false;}
+};
 try{
  const THREE=await import('three'),{OrbitControls}=await import('three/addons/controls/OrbitControls.js');
  const host=$('viewer'),scene=new THREE.Scene();scene.background=new THREE.Color('#eaf0eb');
