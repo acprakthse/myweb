@@ -219,6 +219,30 @@ img, canvas, svg { display: block; max-width: 100%; }
 .thesis-figure figcaption { padding: 1rem 1.5rem; color: var(--faint); font-size: .85rem; letter-spacing: .02em;
   border-top: 1px solid var(--border); text-align: center; }
 
+/* Animated harbor SVG — dark-theme adapted.
+   PNG line-art assets are inverted so navy ink glows amber on dark. */
+.thesis-svg { display: block; width: 100%; height: auto; }
+.thesis-svg .harbor-img image { filter: invert(1) hue-rotate(180deg) saturate(1.15); }
+.thesis-svg .turbine-line { fill: none; stroke: #d9a86c; stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; }
+.thesis-svg .sky-sun { animation: hspin 22s linear infinite; transform-box: fill-box; transform-origin: center; }
+.thesis-svg .sky-cloud-1 { animation: hdrift1 14s ease-in-out infinite; }
+.thesis-svg .sky-cloud-2 { animation: hdrift2 19s ease-in-out infinite; }
+.thesis-svg .sky-cloud-3 { animation: hdrift3 11s ease-in-out infinite; }
+.thesis-svg .ops-bolt { animation: hbolt 2.5s ease-in-out infinite; }
+.thesis-svg .blades { animation: hspin 4s linear infinite; transform-box: fill-box; transform-origin: center; }
+.thesis-svg .turbine-1 .blades { animation-duration: 3s; }
+.thesis-svg .turbine-2 .blades { animation-duration: 5s; }
+.thesis-svg .turbine-3 .blades { animation-duration: 4s; }
+@keyframes hspin { to { transform: rotate(360deg); } }
+@keyframes hdrift1 { 0%,100% { transform: translateX(0); } 50% { transform: translateX(18px); } }
+@keyframes hdrift2 { 0%,100% { transform: translateX(0); } 50% { transform: translateX(-14px); } }
+@keyframes hdrift3 { 0%,100% { transform: translateX(0); } 50% { transform: translateX(10px); } }
+@keyframes hbolt { 0%,100% { opacity: 0; } 40%,60% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .thesis-svg .sky-sun, .thesis-svg .sky-cloud-1, .thesis-svg .sky-cloud-2,
+  .thesis-svg .sky-cloud-3, .thesis-svg .ops-bolt, .thesis-svg .blades { animation: none; }
+}
+
 /* ── About ────────────────────────────── */
 .about-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 2.5rem; align-items: start; margin-top: 2.5rem; }
 .about-copy p { color: var(--muted); margin-bottom: 1.2rem; font-size: 1.04rem; }

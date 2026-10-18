@@ -126,6 +126,13 @@
      Lightweight particle flow along a faint grid,
      with a glowing "power curve" sweeping through. */
   var canvas = document.getElementById('heroCanvas');
+  /* Pause SMIL animations (harbor waves) when reduced motion is preferred */
+  if (reduceMotion) {
+    document.querySelectorAll('svg.thesis-svg').forEach(function (s) {
+      if (s.pauseAnimations) s.pauseAnimations();
+    });
+  }
+
   if (canvas && !reduceMotion) {
     var ctx = canvas.getContext('2d');
     var W = 0, H = 0, dpr = 1;
