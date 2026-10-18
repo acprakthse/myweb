@@ -212,36 +212,35 @@ img, canvas, svg { display: block; max-width: 100%; }
 .section-title em { font-style: normal; color: var(--amber); }
 .section-lead { color: var(--muted); font-size: 1.08rem; max-width: 62ch; margin-bottom: 3rem; }
 
-/* Thesis spotlight — illustration reproduced EXACTLY as in the reference
-   site (index_15_10_2026.html): same SVG markup, same keyframes, same
-   ink colors, same assets with mix-blend-mode:multiply. The figure keeps
-   the reference cream backdrop (#faf8f4) so the line art renders identically. */
+/* Thesis spotlight */
 .thesis-figure { margin: 0; border: 1px solid var(--border-strong); border-radius: var(--radius);
-  overflow: hidden; background: #faf8f4; box-shadow: 0 24px 80px rgba(0,0,0,.45), 0 0 60px var(--amber-glow); }
+  overflow: hidden; background: var(--bg-2); box-shadow: 0 24px 80px rgba(0,0,0,.45), 0 0 60px var(--amber-glow); }
 .thesis-figure img { display: block; width: 100%; height: auto; }
 .thesis-figure figcaption { padding: 1rem 1.5rem; color: var(--faint); font-size: .85rem; letter-spacing: .02em;
-  border-top: 1px solid var(--border); text-align: center; background: var(--bg-2); }
+  border-top: 1px solid var(--border); text-align: center; }
 
+/* Animated harbor SVG — dark-theme adapted.
+   PNG line-art assets are inverted so navy ink glows amber on dark. */
 .thesis-svg { display: block; width: 100%; height: auto; }
-@keyframes sunSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-@keyframes cloudDrift1 { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(18px); } }
-@keyframes cloudDrift2 { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-14px); } }
-@keyframes cloudDrift3 { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(10px); } }
-.thesis-figure .sky-sun     { animation: sunSpin 22s linear infinite; transform-box: fill-box; transform-origin: center; }
-.thesis-figure .sky-cloud-1 { animation: cloudDrift1 14s ease-in-out infinite; }
-.thesis-figure .sky-cloud-2 { animation: cloudDrift2 19s ease-in-out infinite; }
-.thesis-figure .sky-cloud-3 { animation: cloudDrift3 11s ease-in-out infinite; }
-@keyframes boltAppear { 0%, 100% { opacity: 0; } 40%, 60% { opacity: 1; } }
-.thesis-figure .ops-bolt { animation: boltAppear 2.5s ease-in-out infinite; }
-@keyframes rotate-blade { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-.thesis-figure .blades { animation: rotate-blade 4s linear infinite; transform-box: fill-box; transform-origin: center; mix-blend-mode: multiply; }
-.thesis-figure .turbine-1 .blades { animation-duration: 3s; }
-.thesis-figure .turbine-2 .blades { animation-duration: 5s; }
-.thesis-figure .turbine-3 .blades { animation-duration: 4s; }
-.thesis-figure .turbine-line { fill: none; stroke: #1c4475; stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; }
+.thesis-svg .harbor-img image { filter: invert(1) hue-rotate(180deg) saturate(1.15); }
+.thesis-svg .turbine-line { fill: none; stroke: #d9a86c; stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; }
+.thesis-svg .sky-sun { animation: hspin 22s linear infinite; transform-box: fill-box; transform-origin: center; }
+.thesis-svg .sky-cloud-1 { animation: hdrift1 14s ease-in-out infinite; }
+.thesis-svg .sky-cloud-2 { animation: hdrift2 19s ease-in-out infinite; }
+.thesis-svg .sky-cloud-3 { animation: hdrift3 11s ease-in-out infinite; }
+.thesis-svg .ops-bolt { animation: hbolt 2.5s ease-in-out infinite; }
+.thesis-svg .blades { animation: hspin 4s linear infinite; transform-box: fill-box; transform-origin: center; }
+.thesis-svg .turbine-1 .blades { animation-duration: 3s; }
+.thesis-svg .turbine-2 .blades { animation-duration: 5s; }
+.thesis-svg .turbine-3 .blades { animation-duration: 4s; }
+@keyframes hspin { to { transform: rotate(360deg); } }
+@keyframes hdrift1 { 0%,100% { transform: translateX(0); } 50% { transform: translateX(18px); } }
+@keyframes hdrift2 { 0%,100% { transform: translateX(0); } 50% { transform: translateX(-14px); } }
+@keyframes hdrift3 { 0%,100% { transform: translateX(0); } 50% { transform: translateX(10px); } }
+@keyframes hbolt { 0%,100% { opacity: 0; } 40%,60% { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) {
-  .thesis-figure .sky-sun, .thesis-figure .sky-cloud-1, .thesis-figure .sky-cloud-2,
-  .thesis-figure .sky-cloud-3, .thesis-figure .ops-bolt, .thesis-figure .blades { animation: none; }
+  .thesis-svg .sky-sun, .thesis-svg .sky-cloud-1, .thesis-svg .sky-cloud-2,
+  .thesis-svg .sky-cloud-3, .thesis-svg .ops-bolt, .thesis-svg .blades { animation: none; }
 }
 
 /* ── About ────────────────────────────── */
