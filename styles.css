@@ -225,6 +225,8 @@ img, canvas, svg { display: block; max-width: 100%; }
 .thesis-svg { display: block; width: 100%; height: auto; }
 .thesis-svg .harbor-img image { filter: invert(1) hue-rotate(180deg) saturate(1.15); }
 .thesis-svg .turbine-line { fill: none; stroke: #d9a86c; stroke-width: 1.1; stroke-linecap: round; stroke-linejoin: round; }
+/* Turbine towers match the blade color (sampled from blade_wind.png: steel blue #204878) */
+.thesis-svg .turbine-1 .turbine-line, .thesis-svg .turbine-2 .turbine-line, .thesis-svg .turbine-3 .turbine-line { stroke: #204878; }
 .thesis-svg .sky-sun { animation: hspin 22s linear infinite; transform-box: fill-box; transform-origin: center; }
 .thesis-svg .sky-cloud-1 { animation: hdrift1 14s ease-in-out infinite; }
 .thesis-svg .sky-cloud-2 { animation: hdrift2 19s ease-in-out infinite; }
