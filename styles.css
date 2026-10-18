@@ -213,11 +213,12 @@ img, canvas, svg { display: block; max-width: 100%; }
 .section-lead { color: var(--muted); font-size: 1.08rem; max-width: 62ch; margin-bottom: 3rem; }
 
 /* Thesis spotlight */
-.thesis-figure { margin: 0; border: 1px solid var(--border-strong); border-radius: var(--radius);
-  overflow: hidden; background: var(--bg-2); box-shadow: 0 24px 80px rgba(0,0,0,.45), 0 0 60px var(--amber-glow); }
+/* Thesis spotlight — illustration floats directly on the page background,
+   no card, no frame, so it blends seamlessly with the dark theme. */
+.thesis-figure { margin: 0; border: none; background: transparent; box-shadow: none; }
 .thesis-figure img { display: block; width: 100%; height: auto; }
-.thesis-figure figcaption { padding: 1rem 1.5rem; color: var(--faint); font-size: .85rem; letter-spacing: .02em;
-  border-top: 1px solid var(--border); text-align: center; }
+.thesis-figure figcaption { padding: 1rem 0 0; color: var(--faint); font-size: .85rem; letter-spacing: .02em;
+  border: none; background: transparent; text-align: center; }
 
 /* Animated harbor SVG — dark-theme adapted.
    PNG line-art assets are inverted so navy ink glows amber on dark. */
