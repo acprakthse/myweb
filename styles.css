@@ -340,6 +340,11 @@ img, canvas, svg { display: block; max-width: 100%; }
 .project-grid .project-card p { transition: color 0.3s ease; }
 .project-grid .project-card .project-type { transition: color 0.3s ease; }
 .project-grid .project-card .tags span { transition: border-color 0.3s ease, color 0.3s ease, background-color 0.3s ease, transform 0.3s ease; }
+/* Tag kapsul di kartu grid: kuning tema, lebih persegi tapi sudut tetap rounded. */
+.project-grid .project-card .tags span {
+  background: var(--yellow); border-color: var(--yellow); color: var(--text);
+  border-radius: 6px;
+}
 .project-grid .project-body { padding: 1.5rem 1.6rem 1.7rem; }
 
 /* Kotak gambar atas kartu: rasio 2.13:1, seperti kotak "Where This Product Is Used" di halaman Omicron StationScout. Gambar diisi sendiri ke folder assets. */
@@ -369,8 +374,8 @@ img, canvas, svg { display: block; max-width: 100%; }
 .project-grid .project-card:hover p { color: rgba(255, 255, 255, 0.85); }
 .project-grid .project-card:hover p strong { color: #ffffff; }
 .project-grid .project-card:hover .project-type { color: var(--yellow); }
-.project-grid .project-card:hover .tags span { border-color: rgba(255, 255, 255, 0.55); color: #ffffff; background: transparent; }
-.project-grid .project-card:hover .tags span:hover { border-color: #ffffff; color: #ffffff; transform: none; }
+.project-grid .project-card:hover .tags span { border-color: var(--yellow); color: var(--text); background: var(--yellow); }
+.project-grid .project-card:hover .tags span:hover { border-color: var(--yellow); color: var(--text); transform: none; }
 .project-grid .project-card:hover .project-media::after { opacity: 0; }
 .project-grid .project-card:hover .project-media::before { opacity: 1; }
 .project-grid .project-card:hover .media-placeholder { color: rgba(255, 255, 255, 0.9); }
