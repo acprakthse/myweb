@@ -96,12 +96,9 @@ img, canvas, svg { display: block; max-width: 100%; }
   letter-spacing: -0.01em; text-decoration: none;
 }
 .nav-brand-mark {
-  width: 2rem; height: 2rem; border-radius: 10px;
-  background: var(--blue);
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%);
-  color: #ffffff;
-  display: inline-flex; align-items: center; justify-content: center;
-  font-size: 1rem; box-shadow: none;
+  width: 2.4rem; height: 2.4rem;
+  object-fit: contain; display: block; flex-shrink: 0;
+  background: transparent; box-shadow: none;
 }
 .nav-links { display: flex; align-items: center; gap: clamp(1rem, 2.4vw, 2rem); }
 .nav-links a {
