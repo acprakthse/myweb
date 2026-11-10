@@ -330,14 +330,50 @@ img, canvas, svg { display: block; max-width: 100%; }
 .project-card p strong { color: var(--text); }
 .project-partners { font-size: 0.85rem; color: var(--faint) !important; font-style: italic; }
 
-.project-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.4rem; }
+.project-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
 .project-grid .project-card {
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 1.8rem;
-  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  border-radius: var(--radius); padding: 0; overflow: hidden;
+  transition: transform 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
-.project-grid .project-card:hover { transform: translateY(-4px); border-color: rgba(18, 87, 155, 0.45); box-shadow: 0 10px 28px rgba(18, 87, 155, 0.14); }
-.project-grid .project-card h3 { font-size: 1.12rem; }
+.project-grid .project-card h3 { font-size: 1.12rem; transition: color 0.3s ease; }
+.project-grid .project-card p { transition: color 0.3s ease; }
+.project-grid .project-card .project-type { transition: color 0.3s ease; }
+.project-grid .project-card .tags span { transition: border-color 0.3s ease, color 0.3s ease, background-color 0.3s ease, transform 0.3s ease; }
+.project-grid .project-body { padding: 1.5rem 1.6rem 1.7rem; }
+
+/* Kotak gambar atas kartu: rasio 2.13:1, seperti kotak "Where This Product Is Used" di halaman Omicron StationScout. Gambar diisi sendiri ke folder assets. */
+.project-media {
+  position: relative; aspect-ratio: 2.13 / 1; overflow: hidden;
+  background: linear-gradient(180deg, #e9eff5 0%, #f6f8fa 70%, #ffffff 100%);
+}
+.project-media img { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: cover; }
+.project-media::after {
+  content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 55%, rgba(255, 255, 255, 0.9) 100%);
+  transition: opacity 0.3s ease;
+}
+.project-media::before {
+  content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  background: rgba(18, 87, 155, 0.45); opacity: 0; transition: opacity 0.3s ease;
+}
+.media-placeholder {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint);
+  transition: color 0.3s ease;
+}
+
+/* Hover ala Omicron: seluruh kartu jadi biru, warna tulisan menyesuaikan. */
+.project-grid .project-card:hover { background: var(--blue); border-color: var(--blue); }
+.project-grid .project-card:hover h3 { color: #ffffff; }
+.project-grid .project-card:hover p { color: rgba(255, 255, 255, 0.85); }
+.project-grid .project-card:hover p strong { color: #ffffff; }
+.project-grid .project-card:hover .project-type { color: var(--yellow); }
+.project-grid .project-card:hover .tags span { border-color: rgba(255, 255, 255, 0.55); color: #ffffff; background: transparent; }
+.project-grid .project-card:hover .tags span:hover { border-color: #ffffff; color: #ffffff; transform: none; }
+.project-grid .project-card:hover .project-media::after { opacity: 0; }
+.project-grid .project-card:hover .project-media::before { opacity: 1; }
+.project-grid .project-card:hover .media-placeholder { color: rgba(255, 255, 255, 0.9); }
 
 /* ── Skills ───────────────────────────── */
 .skills-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.4rem; margin-top: 2.5rem; }
@@ -414,7 +450,7 @@ img, canvas, svg { display: block; max-width: 100%; }
 
 /* ── Responsive ───────────────────────── */
 @media (max-width: 960px) {
-  .skills-grid, .services-grid { grid-template-columns: repeat(2, 1fr); }
+  .skills-grid, .services-grid, .project-grid { grid-template-columns: repeat(2, 1fr); }
   .about-grid { grid-template-columns: 1fr; }
   .about-card { position: static; }
   .process { grid-template-columns: 1fr; }
