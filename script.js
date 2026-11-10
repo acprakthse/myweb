@@ -177,7 +177,7 @@
       ctx.clearRect(0, 0, W, H);
 
       // faint grid
-      ctx.strokeStyle = 'rgba(255,255,255,0.045)';
+      ctx.strokeStyle = 'rgba(255,255,255,0.09)';
       ctx.lineWidth = 1;
       var gs = 56;
       ctx.beginPath();
@@ -187,12 +187,12 @@
 
       // power curve
       var grad = ctx.createLinearGradient(0, 0, W, 0);
-      grad.addColorStop(0, 'rgba(255,178,36,0)');
-      grad.addColorStop(0.5, 'rgba(255,178,36,0.55)');
-      grad.addColorStop(1, 'rgba(77,227,255,0.45)');
+      grad.addColorStop(0, 'rgba(245,226,20,0)');
+      grad.addColorStop(0.5, 'rgba(245,226,20,0.85)');
+      grad.addColorStop(1, 'rgba(255,255,255,0.7)');
       ctx.strokeStyle = grad;
       ctx.lineWidth = 2;
-      ctx.shadowColor = 'rgba(255,178,36,0.5)';
+      ctx.shadowColor = 'rgba(245,226,20,0.5)';
       ctx.shadowBlur = 14;
       ctx.beginPath();
       for (var x = 0; x <= W; x += 6) {
@@ -210,8 +210,8 @@
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
         ctx.fillStyle = p.hue === 'amber'
-          ? 'rgba(255,178,36,' + p.o.toFixed(2) + ')'
-          : 'rgba(77,227,255,' + p.o.toFixed(2) + ')';
+          ? 'rgba(245,226,20,' + p.o.toFixed(2) + ')'
+          : 'rgba(255,255,255,' + p.o.toFixed(2) + ')';
         ctx.fill();
       });
 
