@@ -41,6 +41,29 @@
     if (e.key === 'Escape') closeMenu();
   });
 
+  /* ── Nav dropdown (Simply Tech) ── */
+  var dropBtn = document.getElementById('navDropBtn');
+  var drop = dropBtn ? dropBtn.closest('.nav-dropdown') : null;
+  if (dropBtn && drop) {
+    dropBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var open = drop.classList.toggle('open');
+      dropBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    document.addEventListener('click', function (e) {
+      if (!drop.contains(e.target)) {
+        drop.classList.remove('open');
+        dropBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') {
+        drop.classList.remove('open');
+        dropBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
   /* ── Scroll reveal ── */
   var revealEls = document.querySelectorAll('.reveal');
   if (reduceMotion || !('IntersectionObserver' in window)) {
