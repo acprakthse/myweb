@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════
-   Ardian Candra — site interactions
-   Vanilla JS · no dependencies
+   Ardian Candra Pratama — Site Interactions
+   Vanilla JS · Zero dependencies
    ═══════════════════════════════════════════ */
 (function () {
   'use strict';
@@ -14,7 +14,7 @@
   /* ── Sticky nav state ── */
   var nav = document.getElementById('nav');
   function onScrollNav() {
-    nav.classList.toggle('scrolled', window.scrollY > 30);
+    if (nav) nav.classList.toggle('scrolled', window.scrollY > 30);
   }
   window.addEventListener('scroll', onScrollNav, { passive: true });
   onScrollNav();
@@ -23,23 +23,26 @@
   var toggle = document.getElementById('navToggle');
   var links = document.getElementById('navLinks');
   function closeMenu() {
+    if (!links || !toggle) return;
     links.classList.remove('open');
     toggle.classList.remove('open');
     toggle.setAttribute('aria-expanded', 'false');
     toggle.setAttribute('aria-label', 'Open menu');
   }
-  toggle.addEventListener('click', function () {
-    var open = links.classList.toggle('open');
-    toggle.classList.toggle('open', open);
-    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
-  });
-  links.querySelectorAll('a').forEach(function (a) {
-    a.addEventListener('click', closeMenu);
-  });
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') closeMenu();
-  });
+  if (toggle && links) {
+    toggle.addEventListener('click', function () {
+      var open = links.classList.toggle('open');
+      toggle.classList.toggle('open', open);
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    });
+    links.querySelectorAll('a').forEach(function (a) {
+      a.addEventListener('click', closeMenu);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeMenu();
+    });
+  }
 
   /* ── Nav dropdown (Simply Tech) ── */
   var dropBtn = document.getElementById('navDropBtn');
@@ -60,6 +63,61 @@
       if (e.key === 'Escape') {
         drop.classList.remove('open');
         dropBtn.setAttribute('aria-expanded', 'false');
+      }
+    });
+  }
+
+  /* ── Experience Timeline Category Filter ── */
+  var filterBtns = document.querySelectorAll('.tl-filter');
+  var timelineItems = document.querySelectorAll('.timeline .tl-item');
+  if (filterBtns.length && timelineItems.length) {
+    filterBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var filter = btn.getAttribute('data-filter');
+        filterBtns.forEach(function (b) {
+          var active = b === btn;
+          b.classList.toggle('active', active);
+          b.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+        timelineItems.forEach(function (item) {
+          var cat = item.getAttribute('data-category');
+          var show = filter === 'all' || cat === filter;
+          item.classList.toggle('is-hidden', !show);
+          if (show) item.classList.add('in');
+        });
+      });
+    });
+  }
+
+  /* ── Copy Email Micro-interaction ── */
+  var copyBtn = document.getElementById('copyEmailBtn');
+  if (copyBtn) {
+    var defaultLabel = copyBtn.textContent;
+    var copyTimer = null;
+    copyBtn.addEventListener('click', function () {
+      var email = copyBtn.getAttribute('data-email') || 'ardian.candra.p@gmail.com';
+      function showCopied() {
+        copyBtn.textContent = 'Copied ✓';
+        copyBtn.classList.add('copied');
+        if (copyTimer) clearTimeout(copyTimer);
+        copyTimer = setTimeout(function () {
+          copyBtn.textContent = defaultLabel;
+          copyBtn.classList.remove('copied');
+        }, 2200);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(email).then(showCopied).catch(function () {
+          window.location.href = 'mailto:' + email;
+        });
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = email;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); showCopied(); } catch (err) {}
+        document.body.removeChild(ta);
       }
     });
   }
@@ -105,7 +163,7 @@
     function tick(now) {
       if (!start) start = now;
       var p = Math.min((now - start) / duration, 1);
-      var eased = 1 - Math.pow(1 - p, 3); // easeOutCubic
+      var eased = 1 - Math.pow(1 - p, 3);
       el.textContent = prefix + formatNum(target * eased, decimals, grouping) + suffix;
       if (p < 1) requestAnimationFrame(tick);
     }
@@ -127,29 +185,26 @@
   }
 
   /* ── Active nav link highlighting ── */
-  var sections = ['about', 'experience', 'projects', 'skills', 'services', 'contact']
+  var sections = ['top', 'about', 'experience', 'projects', 'skills', 'services', 'contact']
     .map(function (id) { return document.getElementById(id); })
     .filter(Boolean);
-  var navAnchors = Array.prototype.slice.call(links.querySelectorAll('a[href^="#"]'));
-  if ('IntersectionObserver' in window && sections.length) {
+  var navAnchors = links ? Array.prototype.slice.call(links.querySelectorAll('a[href^="#"]')) : [];
+  if ('IntersectionObserver' in window && sections.length && navAnchors.length) {
     var sio = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (entry.isIntersecting) {
-          var id = '#' + entry.target.id;
+          var id = entry.target.id === 'top' ? '' : '#' + entry.target.id;
           navAnchors.forEach(function (a) {
-            a.classList.toggle('active', a.getAttribute('href') === id);
+            a.classList.toggle('active', id !== '' && a.getAttribute('href') === id);
           });
         }
       });
-    }, { rootMargin: '-40% 0px -55% 0px' });
+    }, { rootMargin: '-38% 0px -55% 0px' });
     sections.forEach(function (s) { sio.observe(s); });
   }
 
-  /* ── Hero canvas: energy grid ──
-     Lightweight particle flow along a faint grid,
-     with a glowing "power curve" sweeping through. */
+  /* ── Hero canvas: energy grid & daily solar power curve ── */
   var canvas = document.getElementById('heroCanvas');
-  /* Pause SMIL animations (harbor waves) when reduced motion is preferred */
   if (reduceMotion) {
     document.querySelectorAll('svg.thesis-svg').forEach(function (s) {
       if (s.pauseAnimations) s.pauseAnimations();
@@ -178,16 +233,15 @@
         particles.push({
           x: Math.random() * W,
           y: Math.random() * H,
-          s: 0.4 + Math.random() * 1.4,          // speed
-          r: 0.8 + Math.random() * 1.8,          // radius
+          s: 0.4 + Math.random() * 1.4,
+          r: 0.8 + Math.random() * 1.8,
           hue: Math.random() < 0.72 ? 'amber' : 'cyan',
-          o: 0.25 + Math.random() * 0.55         // opacity
+          o: 0.25 + Math.random() * 0.55
         });
       }
     }
 
     function powerCurveY(x) {
-      // daily solar-like curve drifting slowly with time
       var day = (x / W) * Math.PI;
       var base = Math.sin(day);
       var ripple = 0.08 * Math.sin(x * 0.02 + T * 1.6) + 0.04 * Math.sin(x * 0.05 - T);
@@ -199,7 +253,6 @@
       T += 0.008;
       ctx.clearRect(0, 0, W, H);
 
-      // faint grid
       ctx.strokeStyle = 'rgba(255,255,255,0.09)';
       ctx.lineWidth = 1;
       var gs = 56;
@@ -208,7 +261,6 @@
       for (var gy = 0; gy < H; gy += gs) { ctx.moveTo(0, gy); ctx.lineTo(W, gy); }
       ctx.stroke();
 
-      // power curve
       var grad = ctx.createLinearGradient(0, 0, W, 0);
       grad.addColorStop(0, 'rgba(245,226,20,0)');
       grad.addColorStop(0.5, 'rgba(245,226,20,0.85)');
@@ -225,7 +277,6 @@
       ctx.stroke();
       ctx.shadowBlur = 0;
 
-      // particles drifting right, bobbing gently
       particles.forEach(function (p) {
         p.x += p.s;
         p.y += Math.sin(T * 2 + p.x * 0.01) * 0.25;
