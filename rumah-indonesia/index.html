@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Rumah Indonesia — Three.js Asset</title>
+<style>
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#071426;font-family:Inter,system-ui,sans-serif}
+  #stage{position:fixed;inset:0}
+  .panel{position:fixed;left:18px;top:18px;color:#eef5ff;background:rgba(5,17,34,.72);border:1px solid rgba(255,255,255,.15);backdrop-filter:blur(12px);padding:14px 16px;border-radius:14px;max-width:270px;z-index:2}
+  .panel strong{display:block;font-size:14px;letter-spacing:.04em;margin-bottom:5px}
+  .panel span{font-size:12px;color:#b9c8dc;line-height:1.4;display:block}
+  .controls{position:fixed;right:18px;top:18px;display:flex;gap:8px;z-index:2}
+  button{border:1px solid rgba(255,255,255,.2);background:rgba(8,25,45,.8);color:white;padding:10px 13px;border-radius:10px;cursor:pointer;font-weight:600}
+  button:hover{background:#17395b}
+  .hint{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);color:#d9e6f5;background:rgba(5,17,34,.65);padding:8px 12px;border-radius:20px;font-size:11px;white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div class="panel"><strong>RUMAH INDONESIA · 3D ASSET</strong><span>Procedural Three.js scene · genteng, teras, jendela bercahaya, pagar, taman, dan lingkungan malam.</span></div>
+<div class="controls"><button id="lights">Matikan lampu</button><button id="reset">Reset kamera</button></div>
+<div class="hint">Drag untuk memutar · Scroll untuk zoom · Klik “Matikan lampu” untuk simulasi</div>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+
+const mount=document.getElementById('stage');
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x071a36);
+scene.fog=new THREE.FogExp2(0x071a36,0.012);
+const camera=new THREE.PerspectiveCamera(38,innerWidth/innerHeight,.1,300);
+camera.position.set(13,10,17);
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;
+mount.appendChild(renderer.domElement);
+const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(0,2.4,0);controls.enableDamping=true;controls.maxPolarAngle=Math.PI*.48;
+const hemi=new THREE.HemisphereLight(0x9ebfff,0x27301f,1.5);scene.add(hemi);
+const moon=new THREE.DirectionalLight(0x9bbcff,2.1);moon.position.set(-8,16,9);moon.castShadow=true;moon.shadow.mapSize.set(2048,2048);moon.shadow.camera.left=-20;moon.shadow.camera.right=20;moon.shadow.camera.top=20;moon.shadow.camera.bottom=-20;scene.add(moon);
+const warm=new THREE.PointLight(0xffb64d,45,13,2);warm.position.set(0,3.1,2.8);scene.add(warm);
+
+const mat=(color,rough=.8,metal=0)=>new THREE.MeshStandardMaterial({color,roughness:rough,metalness:metal});
+const wall=mat(0xe6dfcf),wallSide=mat(0xc9c3b6),roof=mat(0x71352b),roof2=mat(0x8c4635),trim=mat(0xf0e9d9),wood=mat(0x68452f),dark=mat(0x182331),concrete=mat(0x92999b),grass=mat(0x243d2d),leafMats=[mat(0x244d35),mat(0x315c3a),mat(0x466b3c)],glass=new THREE.MeshStandardMaterial({color:0xffd38a,emissive:0xffa62e,emissiveIntensity:2.2,roughness:.3}),windowFrame=mat(0x46372b),metal=mat(0x29323b,.45,.65);
+function box(parent,name,pos,size,material){const m=new THREE.Mesh(new THREE.BoxGeometry(...size),material);m.name=name;m.position.set(...pos);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m}
+function cylinder(parent,pos,r1,r2,h,material,segments=8){const m=new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,h,segments),material);m.position.set(...pos);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m}
+function sphere(parent,pos,scale,material,detail=1){const m=new THREE.Mesh(new THREE.IcosahedronGeometry(1,detail),material);m.position.set(...pos);m.scale.set(...scale);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m}
+
+// Ground, road and front yard
+box(scene,'terrain',[0,-.35,0],[42,.6,42],grass);
+box(scene,'road',[0,-.02,8],[42,.12,5],mat(0x242c37));
+box(scene,'sidewalk',[0,.04,5.15],[18,.18,1.0],mat(0x858b89));
+box(scene,'yard',[0,.02,1.2],[13,.14,8],mat(0x526347));
+// House mass
+const house=new THREE.Group();scene.add(house);
+box(house,'main walls',[0,2.05,0],[8.2,4.1,6.2],wall);
+box(house,'side wall accent',[4.08,2.05,0],[.06,4.05,6.12],wallSide);
+// plinth and facade trim
+box(house,'foundation',[0,.22,0],[8.45,.42,6.42],concrete);
+box(house,'front fascia',[0,3.95,3.13],[8.35,.18,.16],trim);
+// Roof: two sloped roof planes, ridge along X
+const roofGroup=new THREE.Group();house.add(roofGroup);
+function roofPlane(zSign){const geo=new THREE.BoxGeometry(4.65,.22,7.0);const mesh=new THREE.Mesh(geo,roof2);mesh.position.set(0,4.45,zSign*1.72);mesh.rotation.x=zSign*.48;mesh.castShadow=true;mesh.receiveShadow=true;roofGroup.add(mesh);
+  // tile ridges on roof surface as subtle repeated narrow bars
+  for(let i=0;i<17;i++){const x=-2.15+i*.27;const tile=new THREE.Mesh(new THREE.BoxGeometry(.035,.035,6.65),roof);tile.position.set(x,4.58,zSign*1.72);tile.rotation.x=zSign*.48;tile.castShadow=true;roofGroup.add(tile)}
+}
+roofPlane(1);roofPlane(-1);
+box(house,'roof ridge',[0,5.25,0],[.24,.22,7.15],roof);
+// roof eaves
+box(house,'front eave',[0,4.0,3.35],[8.9,.18,.24],roof);
+box(house,'back eave',[0,4.0,-3.35],[8.9,.18,.24],roof);
+// Front facade: large windows and central door
+box(house,'left window frame',[-2.45,2.15,3.13],[2.0,2.15,.16],windowFrame);
+box(house,'left window glow',[-2.45,2.15,3.23],[1.72,1.88,.035],glass);
+box(house,'left window mullion v',[-2.45,2.15,3.27],[.07,1.9,.06],windowFrame);
+box(house,'left window mullion h',[-2.45,2.15,3.27],[1.8,.07,.06],windowFrame);
+box(house,'door frame',[0,1.65,3.15],[1.35,3.05,.2],wood);
+box(house,'door',[0,1.65,3.27],[1.12,2.82,.08],mat(0x795237));
+const knob=sphere(house,[.42,1.6,3.34],[.07,.07,.07],mat(0xd9b66b),2);
+box(house,'right window frame',[2.45,2.15,3.13],[2.0,2.15,.16],windowFrame);
+box(house,'right window glow',[2.45,2.15,3.23],[1.72,1.88,.035],glass);
+box(house,'right window mullion v',[2.45,2.15,3.27],[.07,1.9,.06],windowFrame);
+box(house,'right window mullion h',[2.45,2.15,3.27],[1.8,.07,.06],windowFrame);
+// Porch canopy and columns
+box(house,'porch canopy',[0,3.65,4.25],[5.8,.22,2.25],roof2);
+for(const x of [-2.65,2.65])box(house,'porch column',[x,1.85,5.05],[.22,3.55,.22],trim);
+box(house,'porch floor',[0,.35,4.3],[6.1,.25,2.5],mat(0xb4a58d));
+// Porch chairs
+for(const x of [-1.75,1.75]){box(house,'chair seat',[x,.95,4.65],[.85,.14,.75],wood);box(house,'chair back',[x,1.48,4.98],[.85,1.0,.12],wood);for(const dx of [-.32,.32])for(const z of [4.38,4.9])box(house,'chair leg',[x+dx,.62,z],[.09,.65,.09],wood)}
+// Windows on side wall
+for(const z of [-1.65,.45]){box(house,'side window frame',[4.13,2.25,z],[.12,1.55,1.35],windowFrame);box(house,'side window light',[4.21,2.25,z],[.035,1.32,1.12],glass)}
+// Fence and gate along front boundary
+for(let x=-6.5;x<=6.5;x+=1.05){box(scene,'fence pillar',[x,.7,5.95],[.28,1.4,.28],concrete);}
+for(const y of [.38,.95])box(scene,'fence rail',[0,y,5.95],[13.2,.13,.13],trim);
+for(let x=-6.0;x<=6.0;x+=.42)box(scene,'fence slat',[x,.68,5.95],[.09,.95,.09],mat(0x626c6a));
+// Gate opening and gate panels
+for(const x of [-.9,.9]){box(scene,'gate panel',[x,.8,5.95],[1.65,1.45,.12],metal);for(let j=-3;j<=3;j++)box(scene,'gate bars',[x+j*.19,.8,6.04],[.045,1.35,.05],trim)}
+// Garden path stones
+for(let i=0;i<5;i++){const p=box(scene,'path stone',[0,.16,4.9-i*.85],[1.15,.12,.65],mat(0xaaa99b));p.rotation.y=(i%2?-.08:.08)}
+// Stylized trees and shrubs
+function tree(x,z,s=1){const g=new THREE.Group();g.position.set(x,0,z);g.scale.setScalar(s);scene.add(g);cylinder(g,[0,1.4,0],.22,.32,2.8,mat(0x5b3d2b),7);for(let i=0;i<8;i++){const a=i*Math.PI*2/8;const y=2.65+(i%3)*.35;sphere(g,[Math.cos(a)*.75,y,Math.sin(a)*.65],[.9,.85,.85],leafMats[i%3],1)}sphere(g,[0,3.45,0],[1.05,1.0,1.0],leafMats[1],1);}
+tree(-7,1.0,1.25);tree(7,1.3,1.15);tree(-8,-5,1.6);tree(9,-7,1.5);
+for(let i=0;i<22;i++){const x=(Math.random()-.5)*12,z=2.2+Math.random()*2.3;sphere(scene,[x,.42,z],[.35,.28,.35],leafMats[i%3],1)}
+// Small flowering plants
+const flower=mat(0xd96f9a);for(let i=0;i<16;i++){const x=-5.8+i*.77;sphere(scene,[x,.42,4.8],[.16,.12,.16],flower,1)}
+// Background village silhouettes
+for(let i=0;i<9;i++){const x=-18+i*4.5,z=-10-(i%3)*2;const h=2.2+(i%4)*.45;box(scene,'distant home',[x,h/2,z],[3.1,h,2.5],mat(0x26374a));const r= new THREE.Mesh(new THREE.ConeGeometry(2.4,.95,4),roof);r.position.set(x,h+.45,z);r.rotation.y=Math.PI/4;r.castShadow=true;scene.add(r);}
+// Utility poles and overhead wires in the distance
+function pole(x,z){cylinder(scene,[x,4,z],.12,.16,8,mat(0x514c42),7);box(scene,'crossarm',[x,7.55,z],[2.2,.16,.18],wood);for(const dx of [-.8,0,.8]){cylinder(scene,[x+dx,7.85,z],.07,.07,.45,mat(0x9a9b91),8)}}
+pole(8,-2);pole(13,-8);pole(-9,-7);
+function wire(a,b,y){const curve=new THREE.CatmullRomCurve3([new THREE.Vector3(a[0],y,a[1]),new THREE.Vector3((a[0]+b[0])/2,y-.55,(a[1]+b[1])/2),new THREE.Vector3(b[0],y,b[1])]);const tube=new THREE.Mesh(new THREE.TubeGeometry(curve,32,.025,6,false),metal);scene.add(tube)}
+wire([8,-2],[13,-8],7.8);wire([-9,-7],[8,-2],7.8);wire([8,-2],[13,-8],7.35);
+// Moon and stars
+const moonBall=new THREE.Mesh(new THREE.SphereGeometry(1,24,16),new THREE.MeshBasicMaterial({color:0xdceaff}));moonBall.position.set(-12,15,-18);scene.add(moonBall);
+for(let i=0;i<100;i++){const star=new THREE.Mesh(new THREE.SphereGeometry(.035,6,6),new THREE.MeshBasicMaterial({color:0xcbdcff}));star.position.set((Math.random()-.5)*55,8+Math.random()*18,-12-Math.random()*25);scene.add(star)}
+// Light switch affects emissive windows and warm porch lighting
+let on=true;const windows=[];house.traverse(o=>{if(o.isMesh&&o.material===glass)windows.push(o)});
+const porchLamp=new THREE.PointLight(0xffb45c,32,8,2);porchLamp.position.set(0,3.1,4.2);scene.add(porchLamp);
+const button=document.getElementById('lights');button.onclick=()=>{on=!on;glass.emissiveIntensity=on?2.2:0.02;warm.intensity=on?45:0;porchLamp.intensity=on?32:0;button.textContent=on?'Matikan lampu':'Nyalakan lampu'};
+document.getElementById('reset').onclick=()=>{camera.position.set(13,10,17);controls.target.set(0,2.4,0);controls.update()};
+function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera)}animate();
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+</script>
+</body>
+</html>
